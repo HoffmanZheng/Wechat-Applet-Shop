@@ -29,13 +29,9 @@
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="ID" sqlStatement="Mysql" identity="true" />
             <columnOverride column="avatar_url" property="avatarUrl" />
-<<<<<<< HEAD
             <columnOverride column="created_at" property="createdAt" />
             <columnOverride column="modified_at" property="modifiedAt" />
-=======
-            <columnOverride column="created_at" jdbcType="createdAt" />
-            <columnOverride column="modified_at" jdbcType="modifiedAt" />
->>>>>>> 4f61269714ad74f3626ee36216aab8638a9c2aa8
+
         </table>
 
     </context>
