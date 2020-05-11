@@ -4,3 +4,6 @@ spring:
     username: root
     password: 123456
     driverClassName: com.mysql.cj.jdbc.Driver
+
+mybatis:
+  config-location: classpath:db/mybatis/config.xml
