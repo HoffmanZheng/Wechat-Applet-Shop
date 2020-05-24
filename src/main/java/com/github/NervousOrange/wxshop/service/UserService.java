@@ -20,7 +20,6 @@ public class UserService {
         try {
             userDao.createUserIfNotExist(tel);
         } catch (PersistenceException e) {
-            e.printStackTrace();
             System.out.println("用户已经存在");
         }
         User user = userDao.loadUserByTel(tel);
