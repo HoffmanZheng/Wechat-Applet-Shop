@@ -1,4 +1,4 @@
-package com.github.NervousOrange.wxshop.entity;
+package com.github.NervousOrange.wxshop.generated;
 
 import java.util.Date;
 

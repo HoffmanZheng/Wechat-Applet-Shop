@@ -1,7 +1,5 @@
-package com.github.NervousOrange.wxshop.dao;
+package com.github.NervousOrange.wxshop.generated;
 
-import com.github.NervousOrange.wxshop.entity.User;
-import com.github.NervousOrange.wxshop.entity.UserExample;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 

@@ -1,7 +1,7 @@
 package com.github.NervousOrange.wxshop.dao;
 
-import com.github.NervousOrange.wxshop.entity.User;
-import com.github.NervousOrange.wxshop.entity.UserExample;
+import com.github.NervousOrange.wxshop.generated.User;
+import com.github.NervousOrange.wxshop.generated.UserExample;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class UserDao {
         try(SqlSession sqlSession = sqlSessionFactory.openSession(true)) {
             User user = new User();
             user.setTel(tel);
-            sqlSession.insert("com.github.NervousOrange.wxshop.dao.UserMapper.insert", user);
+            sqlSession.insert("com.github.NervousOrange.wxshop.generated.UserMapper.insert", user);
         }
     }
 
@@ -28,7 +28,7 @@ public class UserDao {
         try(SqlSession sqlSession = sqlSessionFactory.openSession(true)) {
             UserExample example = new UserExample();
             example.createCriteria().andTelEqualTo(tel);
-            return sqlSession.selectOne("com.github.NervousOrange.wxshop.dao.UserMapper.selectByExample", example);
+            return sqlSession.selectOne("com.github.NervousOrange.wxshop.generated.UserMapper.selectByExample", example);
         }
     }
 }
