@@ -7,6 +7,4 @@ public interface SmsCodeService {
      * @return 返回正确的code
      */
     String sendSmsCode(String tel);
-
-
 }

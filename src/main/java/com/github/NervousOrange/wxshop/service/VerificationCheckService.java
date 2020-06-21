@@ -15,5 +15,4 @@ public class VerificationCheckService {
     public String getCredentials(String tel) {
         return telToCorrectCode.get(tel);
     }
-
 }
