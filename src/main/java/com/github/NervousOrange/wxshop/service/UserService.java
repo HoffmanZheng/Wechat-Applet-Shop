@@ -22,7 +22,10 @@ public class UserService {
         } catch (PersistenceException e) {
             System.out.println("用户已经存在");
         }
-        User user = userDao.loadUserByTel(tel);
-        return user;
+        return userDao.loadUserByTel(tel);
+    }
+
+    public User getUserByTel(String tel) {
+        return userDao.loadUserByTel(tel);
     }
 }

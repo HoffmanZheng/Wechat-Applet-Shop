@@ -1,43 +1,172 @@
 package com.github.NervousOrange.wxshop.controller;
 
+import com.github.NervousOrange.wxshop.entity.Response;
+import com.github.NervousOrange.wxshop.generated.User;
 import com.github.NervousOrange.wxshop.service.AuthService;
 import com.github.NervousOrange.wxshop.service.TelVerificationService;
+import com.github.NervousOrange.wxshop.service.UserService;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
+@RequestMapping("/api/v1")
 public class AuthController {
     private final AuthService authService;
     private final TelVerificationService telVerificationService;
+    private final UserService userService;
 
     @Autowired
-    public AuthController(AuthService authService, TelVerificationService telVerificationService) {
+    public AuthController(AuthService authService, TelVerificationService telVerificationService, UserService userService) {
         this.authService = authService;
         this.telVerificationService = telVerificationService;
+        this.userService = userService;
     }
 
-    @PostMapping("/api/register")
-    public void auth(@RequestBody TelAndCode telAndCode, HttpServletResponse httpServletResponse) {
+    /**
+     * @api {post} /code 请求验证码
+     * @apiName code
+     * @apiGroup 登录与鉴权
+     *
+     * @apiHeader {String} Accept application/json
+     * @apiHeader {String} Content-Type application/json
+     *
+     * @apiParam {String} tel 手机号码
+     * @apiParamExample {json} Request-Example:
+     *          {
+     *              "tel": "13812345678",
+     *          }
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * @apiError 400 Bad Request 若用户的请求包含错误
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 400 Bad Request
+     *     {
+     *       "message": "Bad Request"
+     *     }
+     */
+    @PostMapping("/code")
+    public void code(@RequestBody TelAndCode telAndCode, HttpServletResponse response) {
         if (telVerificationService.isTelParameterValid(telAndCode)) {
             authService.sendVerificationCode(telAndCode.getTel());
         } else {
-            httpServletResponse.setStatus(HttpStatus.BAD_REQUEST.value());
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
         }
     }
 
-    @PostMapping("/api/login")
+    /**
+     * @api {post} /login 登录
+     * @apiName login
+     * @apiGroup 登录与鉴权
+     *
+     * @apiHeader {String} Accept application/json
+     * @apiHeader {String} Content-Type application/json
+     *
+     * @apiParam {String} tel 手机号码
+     * @apiParam {String} code 验证码
+     * @apiParamExample {json} Request-Example:
+     *          {
+     *              "tel": "13812345678",
+     *              "code": "000000"
+     *          }
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     * @apiError 400 Bad Request 若用户的请求包含错误
+     * @apiError 403 Forbidden 若用户的验证码错误
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 400 Bad Request
+     *     {
+     *       "message": "Bad Request"
+     *     }
+     */
+    @PostMapping("/login")
     public void login(@RequestBody TelAndCode telAndCode) {
         UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(
                 telAndCode.getTel(), telAndCode.getCode());
         usernamePasswordToken.setRememberMe(true);
         SecurityUtils.getSubject().login(usernamePasswordToken);
+    }
+
+    /**
+     * @api {get} /status 获取登录状态
+     * @apiName status
+     * @apiGroup 登录与鉴权
+     *
+     * @apiHeader {String} Accept application/json
+     * @apiHeader {String} Content-Type application/json
+     *
+     * @apiSuccess {User} user 用户信息
+     * @apiSuccess {Boolean} login 登录状态
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *     {
+     *         "login": true,
+     *         "user": {
+     *             "id": 123,
+     *             "name": "张三",
+     *             "tel": "13812345678",
+     *             "avatarUrl": "https://url",
+     *             "address": "北京市 西城区 100号",
+     *         }
+     *      }
+     * @apiError 401 Unauthorized 用户未登录
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 401 Unauthorized
+     *     {
+     *        "message": "Unauthorized"
+     *     }
+     */
+    @GetMapping("/status")
+    public Response status(HttpServletResponse response) {
+        String tel = (String) SecurityUtils.getSubject().getPrincipal();
+        if (tel == null) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return new Response("Unauthorized");
+        } else {
+            User user = userService.getUserByTel(tel);
+            return new Response(true, user);
+        }
+    }
+
+    /**
+     * @api {get} /logout 登出
+     * @apiName logout
+     * @apiGroup 登录与鉴权
+     *
+     * @apiHeader {String} Accept application/json
+     * @apiHeader {String} Content-Type application/json
+     *
+     * @apiSuccessExample Success-Response:
+     *     HTTP/1.1 200 OK
+     *
+     * @apiError 401 Unauthorized 用户未登录
+     *
+     * @apiErrorExample Error-Response:
+     *     HTTP/1.1 401 Unauthorized
+     *     {
+     *        "message": "Unauthorized"
+     *     }
+     */
+    @GetMapping("/logout")
+    public Response logout(HttpServletResponse response) {
+        String tel = (String) SecurityUtils.getSubject().getPrincipal();
+        if (tel == null) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return new Response("Unauthorized");
+        } else {
+            SecurityUtils.getSubject().logout();
+            return new Response();
+        }
     }
 
     public static class TelAndCode{
