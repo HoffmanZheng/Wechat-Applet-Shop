@@ -7,6 +7,8 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
+
 @Component
 public class UserDao {
     private final SqlSessionFactory sqlSessionFactory;
@@ -20,6 +22,8 @@ public class UserDao {
         try(SqlSession sqlSession = sqlSessionFactory.openSession(true)) {
             User user = new User();
             user.setTel(tel);
+            user.setCreatedAt(new Date());
+            user.setModifiedAt(new Date());
             sqlSession.insert("com.github.NervousOrange.wxshop.generated.UserMapper.insert", user);
         }
     }

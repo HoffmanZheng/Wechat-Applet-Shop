@@ -12,16 +12,16 @@
                         password="123456">
         </jdbcConnection>
 
-        <javaModelGenerator targetPackage="com.github.NervousOrange.wxshop.entity" targetProject="src/main/java">
+        <javaModelGenerator targetPackage="com.github.NervousOrange.wxshop.generated" targetProject="src/main/java">
             <property name="enableSubPackages" value="true" />
             <property name="trimStrings" value="true" />
         </javaModelGenerator>
 
-        <sqlMapGenerator targetPackage="/"  targetProject="src/main/resources/db/mybatis">
+        <sqlMapGenerator targetPackage="db.mybatis"  targetProject="src/main/resources">
             <property name="enableSubPackages" value="true" />
         </sqlMapGenerator>
 
-        <javaClientGenerator type="XMLMAPPER" targetPackage="com.github.NervousOrange.wxshop.dao"  targetProject="src/main/java">
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.github.NervousOrange.wxshop.generated"  targetProject="src/main/java">
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 

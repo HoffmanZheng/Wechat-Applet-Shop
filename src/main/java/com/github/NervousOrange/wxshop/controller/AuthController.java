@@ -6,6 +6,7 @@ import com.github.NervousOrange.wxshop.service.AuthService;
 import com.github.NervousOrange.wxshop.service.TelVerificationService;
 import com.github.NervousOrange.wxshop.service.UserService;
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class AuthController {
     }
 
     /**
-     * @api {post} /code 请求验证码
+     * @api {post} /code 使用手机号，请求验证码
      * @apiName code
      * @apiGroup 登录与鉴权
      *
@@ -38,7 +39,7 @@ public class AuthController {
      * @apiParam {String} tel 手机号码
      * @apiParamExample {json} Request-Example:
      *          {
-     *              "tel": "13812345678",
+     *              "tel": "13812345678"
      *          }
      *
      * @apiSuccessExample Success-Response:
@@ -88,11 +89,16 @@ public class AuthController {
      *     }
      */
     @PostMapping("/login")
-    public void login(@RequestBody TelAndCode telAndCode) {
+    public void login(@RequestBody TelAndCode telAndCode, HttpServletResponse response) {
         UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(
                 telAndCode.getTel(), telAndCode.getCode());
         usernamePasswordToken.setRememberMe(true);
-        SecurityUtils.getSubject().login(usernamePasswordToken);
+        try {
+            SecurityUtils.getSubject().login(usernamePasswordToken);
+        } catch (IncorrectCredentialsException e) {
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+        }
+
     }
 
     /**
