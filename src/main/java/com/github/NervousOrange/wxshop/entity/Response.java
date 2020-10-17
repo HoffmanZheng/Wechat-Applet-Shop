@@ -7,22 +7,29 @@ public class Response {
     private User user;
     private String message;
 
-    public Response() {
+    private Response() {
     }
 
-    public Response(String message) {
+    private Response(Boolean login, String message) {
+        this.login = login;
         this.message = message;
     }
 
-    public Response(Boolean login, User user) {
+    private Response(Boolean login, User user) {
         this.login = login;
         this.user = user;
     }
 
-    public Response(Boolean login, User user, String message) {
-        this.login = login;
-        this.user = user;
-        this.message = message;
+    public static Response notLoggedResponse(String message) {
+        return new Response(false, message);
+    }
+
+    public static Response emptyResponse() {
+        return new Response();
+    }
+
+    public static Response loggedResponse(User user) {
+        return new Response(true, user);
     }
 
     public Boolean getLogin() {

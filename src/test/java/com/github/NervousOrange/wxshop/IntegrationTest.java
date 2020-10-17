@@ -129,6 +129,16 @@ public class IntegrationTest {
         getStatusWhenUserIsLogged();
     }
 
+    @Test
+    public void testLoginFilter() throws IOException {
+        System.out.println("测试 —— 匿名拦截器：未登录返回 401 Unauthorized");
+        HttpGet httpGet = new HttpGet(getUrl("/api/v1/any"));
+        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+            System.out.println(response.getStatusLine());
+            Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusLine().getStatusCode());
+        }
+    }
+
     public void successfulLoginReturnSetCookie() throws IOException {
         System.out.println("登录 —— 获取 cookie");
         HttpPost httpPost = new HttpPost(getUrl("/api/v1/login"));
@@ -162,10 +172,10 @@ public class IntegrationTest {
         return "http://localhost:" + environment.getProperty("local.server.port") + apiName;
     }
 
-    private String initializeHTTPRequest(
-            boolean isGet, String urlInterface, String param, Object requestBody, int expectedHttpStatus) throws IOException {
+    private String initializeHTTPRequest(boolean isGet, String urlInterface,
+        String requestParam, Object requestBody, int expectedHttpStatus) throws IOException {
         if (isGet) {
-            HttpGet httpGet = new HttpGet(getUrl(urlInterface) + param);
+            HttpGet httpGet = new HttpGet(getUrl(urlInterface) + requestParam);
             try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
                 System.out.println(response.getStatusLine());
                 Assertions.assertEquals(expectedHttpStatus, response.getStatusLine().getStatusCode());
