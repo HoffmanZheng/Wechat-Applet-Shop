@@ -1,5 +1,6 @@
 package com.github.NervousOrange.wxshop.controller;
 
+import com.github.NervousOrange.wxshop.config.UserContext;
 import com.github.NervousOrange.wxshop.entity.Response;
 import com.github.NervousOrange.wxshop.generated.User;
 import com.github.NervousOrange.wxshop.service.AuthService;
@@ -134,13 +135,21 @@ public class AuthController {
      */
     @GetMapping("/status")
     public Response status(HttpServletResponse response) {
-        String tel = (String) SecurityUtils.getSubject().getPrincipal();
+        // TODO 从 UserContext 中取 User
+        /*String tel = (String) SecurityUtils.getSubject().getPrincipal();
         if (tel == null) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             return new Response("Unauthorized");
         } else {
             User user = userService.getUserByTel(tel);
             return new Response(true, user);
+        }*/
+        User currentUser = UserContext.getCurrentUser();
+        if (currentUser != null) {
+            return Response.loggedResponse(currentUser);
+        } else {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return Response.notLoggedResponse("Unauthorized");
         }
     }
 
@@ -168,10 +177,10 @@ public class AuthController {
         String tel = (String) SecurityUtils.getSubject().getPrincipal();
         if (tel == null) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return new Response("Unauthorized");
+            return Response.notLoggedResponse("Unauthorized");
         } else {
             SecurityUtils.getSubject().logout();
-            return new Response();
+            return Response.emptyResponse();
         }
     }
 

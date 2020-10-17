@@ -1,9 +1,8 @@
 package com.github.NervousOrange.wxshop.generated;
 
-import com.github.NervousOrange.wxshop.generated.User;
-import com.github.NervousOrange.wxshop.generated.UserExample;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface UserMapper {
     /**

@@ -9,6 +9,7 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
+
 public class ShiroRealm extends AuthorizingRealm {
 
     private final VerificationCheckService verificationCheckService;
