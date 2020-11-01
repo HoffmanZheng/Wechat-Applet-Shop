@@ -40,6 +40,17 @@ public class IntegrationTest {
     private static String COOKIE;
 
     @Test
+    @Order(0)
+    public void testLoginFilter() throws IOException {
+        System.out.println("测试 —— 匿名拦截器：未登录返回 401 Unauthorized");
+        HttpGet httpGet = new HttpGet(getUrl("/api/v1/any"));
+        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+            System.out.println(response.getStatusLine());
+            Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusLine().getStatusCode());
+        }
+    }
+
+    @Test
     @Order(1)
     public void getStatusWhenUserIsNotLogged() throws IOException {
         System.out.println("测试 —— 获取登录状态：未登录返回 401 Unauthorized");
@@ -116,28 +127,70 @@ public class IntegrationTest {
 
     @Test
     @Order(8)
-    public void comprehensiveTest() throws IOException {
-        getStatusWhenUserIsNotLogged();
-        failedLogout();
-        getCodeWithCorrectParameter();  // save info
-        getStatusWhenUserIsNotLogged();
-        successfulLoginReturnSetCookie();
-        getStatusWhenUserIsLogged();
-        successfulLogout();
-        getStatusWhenUserIsNotLogged();
-        successfulLoginWithCookie();
-        getStatusWhenUserIsLogged();
+    public void getStatusAfterLogOut() throws IOException {
+        System.out.println("测试 —— 登出后获取登录状态：返回 401 Unauthorized");
+        String responseString = initializeHTTPRequest(
+                true, "/api/v1/status",
+                "", null, HttpStatus.UNAUTHORIZED.value());
+        Map map = objectMapper.readValue(responseString, Map.class);
+        String message = (String) map.get("message");
+        Assertions.assertEquals("Unauthorized", message);
     }
 
     @Test
-    public void testLoginFilter() throws IOException {
-        System.out.println("测试 —— 匿名拦截器：未登录返回 401 Unauthorized");
-        HttpGet httpGet = new HttpGet(getUrl("/api/v1/any"));
+    @Order(9)
+    public void comprehensiveCookieTest() throws IOException {
+        successfulLoginReturnSetCookie();
+        getStatusWhenUserIsLogged();
+        getStatusWithoutCookie();  // clear cookie in this step
+        getStatusWithCookie();
+        failedLogout();  // failedLogout without cookie
+        successfulLogoutWithCookie();
+        getStatusWithExpiredCookie();  // cookie expired after logout
+    }
+
+    private void getStatusWithExpiredCookie() throws IOException {
+        System.out.println("用已经过期的 cookie 获取登录状态：返回 401 Unauthorized");
+        HttpGet httpGet = new HttpGet(getUrl("/api/v1/status"));
+        httpGet.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpGet.setHeader("Cookie", "JSESSIONID=" + COOKIE);
         try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
             System.out.println(response.getStatusLine());
             Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusLine().getStatusCode());
+            String responseString = EntityUtils.toString(response.getEntity());
+            Map map = objectMapper.readValue(responseString, Map.class);
+            String message = (String) map.get("message");
+            Assertions.assertEquals("Unauthorized", message);
+
         }
     }
+
+    private void successfulLogoutWithCookie() throws IOException {
+        System.out.println("用 cookie 登出：返回 200 OK");
+        HttpGet httpGet = new HttpGet(getUrl("/api/v1/logout"));
+        httpGet.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpGet.setHeader("Cookie", "JSESSIONID=" + COOKIE);
+        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+            System.out.println(response.getStatusLine());
+            Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusLine().getStatusCode());
+        }
+    }
+
+    private void getStatusWithoutCookie() throws IOException {
+        System.out.println("不用用 Cookie 登录：返回 401 Unauthorized");
+        HttpGet httpGet = new HttpGet(getUrl("/api/v1/status"));
+        httpGet.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        cookieStore.clear();
+        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+            System.out.println(response.getStatusLine());
+            Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusLine().getStatusCode());
+            String responseString = EntityUtils.toString(response.getEntity());
+            Map map = objectMapper.readValue(responseString, Map.class);
+            String message = (String) map.get("message");
+            Assertions.assertEquals("Unauthorized", message);
+        }
+    }
+
 
     public void successfulLoginReturnSetCookie() throws IOException {
         System.out.println("登录 —— 获取 cookie");
@@ -149,22 +202,26 @@ public class IntegrationTest {
             response = httpclient.execute(httpPost);
             System.out.println(response.getStatusLine());
             List<Cookie> cookies = cookieStore.getCookies();
-            // System.out.println(objectMapper.writeValueAsString(cookies));
+            System.out.println(objectMapper.writeValueAsString(cookies));
             COOKIE = cookies.get(0).getValue();
         } finally {
             Objects.requireNonNull(response).close();
         }
     }
 
-    private void successfulLoginWithCookie() throws IOException {
-        System.out.println("用 Cookie 登录：成功返回 200 OK");
-        HttpPost httpPost = new HttpPost(getUrl("/api/v1/login"));
-        httpPost.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.setHeader("Cookie", COOKIE);
-        httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(TelVerificationServiceTest.VALID_TEL_PARAMETER)));
-        try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
+    private void getStatusWithCookie() throws IOException {
+        System.out.println("用 cookie 获取登录状态：已登录返回 200 OK，且返回登录的用户信息");
+        HttpGet httpGet = new HttpGet(getUrl("/api/v1/status"));
+        httpGet.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpGet.setHeader("Cookie", "JSESSIONID=" + COOKIE);
+        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
             System.out.println(response.getStatusLine());
             Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusLine().getStatusCode());
+            String responseString = EntityUtils.toString(response.getEntity());
+            Map map = objectMapper.readValue(responseString, Map.class);
+            Assertions.assertTrue((Boolean) map.get("login"));
+            Map userMap = (Map) map.get("user");
+            Assertions.assertEquals(TelVerificationServiceTest.VALID_TEL_PARAMETER.getTel(), userMap.get("tel"));
         }
     }
 
@@ -173,7 +230,7 @@ public class IntegrationTest {
     }
 
     private String initializeHTTPRequest(boolean isGet, String urlInterface,
-        String requestParam, Object requestBody, int expectedHttpStatus) throws IOException {
+                                         String requestParam, Object requestBody, int expectedHttpStatus) throws IOException {
         if (isGet) {
             HttpGet httpGet = new HttpGet(getUrl(urlInterface) + requestParam);
             try (CloseableHttpResponse response = httpclient.execute(httpGet)) {

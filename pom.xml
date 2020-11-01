@@ -201,6 +201,9 @@
 						<version>8.0.20</version>
 					</dependency>
 				</dependencies>
+				<configuration>
+					<overwrite>true</overwrite>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -31,7 +31,50 @@
             <columnOverride column="avatar_url" property="avatarUrl" />
             <columnOverride column="created_at" property="createdAt" />
             <columnOverride column="modified_at" property="modifiedAt" />
+        </table>
 
+        <table schema="wxshop" tableName="GOODS" domainObjectName="Goods" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+            <columnOverride column="shop_id" property="shopId" />
+            <columnOverride column="img_url" property="imgUrl" />
+            <columnOverride column="created_at" property="createdAt" />
+            <columnOverride column="modified_at" property="modifiedAt" />
+        </table>
+
+        <table schema="wxshop" tableName="ORDER" domainObjectName="Order" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+            <columnOverride column="user_id" property="userId" />
+            <columnOverride column="total_price" property="totalPrice" />
+            <columnOverride column="express_company" property="expressCompany" />
+            <columnOverride column="express_id" property="expressId" />
+            <columnOverride column="created_at" property="createdAt" />
+            <columnOverride column="modified_at" property="modifiedAt" />
+        </table>
+
+        <table schema="wxshop" tableName="ORDER_GOODS" domainObjectName="OrderGoods" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+            <columnOverride column="goods_id" property="GoodsId" />
+        </table>
+
+        <table schema="wxshop" tableName="SHOP" domainObjectName="Shop" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+            <columnOverride column="img_url" property="imgUrl" />
+            <columnOverride column="owner_user_id" property="ownerUserId" />
+            <columnOverride column="created_at" property="createdAt" />
+            <columnOverride column="modified_at" property="modifiedAt" />
+        </table>
+
+        <table schema="wxshop" tableName="SHOPPING_CART" domainObjectName="ShoppingCart" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+            <columnOverride column="user_id" property="userId" />
+            <columnOverride column="goods_id" property="goodsId" />
+            <columnOverride column="created_at" property="createdAt" />
+            <columnOverride column="modified_at" property="modifiedAt" />
         </table>
 
     </context>
