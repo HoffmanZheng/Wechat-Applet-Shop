@@ -43,6 +43,10 @@ public class ShiroConfig implements WebMvcConfigurer {
         pattern.put("/api/v1/login", "anon");
         pattern.put("/api/v1/code", "anon");
         pattern.put("/api/v1/status", "anon");
+        pattern.put("/swagger-ui.html/**", "anon");
+        pattern.put("/swagger-resources/**", "anon");
+        pattern.put("/webjars/**", "anon");
+        pattern.put("/v2/**", "anon");
         pattern.put("/**", "authc");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(pattern);
         return shiroFilterFactoryBean;

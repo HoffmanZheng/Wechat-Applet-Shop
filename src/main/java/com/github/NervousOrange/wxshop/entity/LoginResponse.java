@@ -1,35 +1,38 @@
 package com.github.NervousOrange.wxshop.entity;
 
 import com.github.NervousOrange.wxshop.generated.User;
+import io.swagger.annotations.ApiModelProperty;
 
-public class Response {
+public class LoginResponse {
+
+    @ApiModelProperty(example = "true", required = true)
     private Boolean login;
     private User user;
     private String message;
 
-    private Response() {
+    private LoginResponse() {
     }
 
-    private Response(Boolean login, String message) {
+    private LoginResponse(Boolean login, String message) {
         this.login = login;
         this.message = message;
     }
 
-    private Response(Boolean login, User user) {
+    private LoginResponse(Boolean login, User user) {
         this.login = login;
         this.user = user;
     }
 
-    public static Response notLoggedResponse(String message) {
-        return new Response(false, message);
+    public static LoginResponse notLoggedResponse(String message) {
+        return new LoginResponse(false, message);
     }
 
-    public static Response emptyResponse() {
-        return new Response();
+    public static LoginResponse emptyResponse() {
+        return new LoginResponse();
     }
 
-    public static Response loggedResponse(User user) {
-        return new Response(true, user);
+    public static LoginResponse loggedResponse(User user) {
+        return new LoginResponse(true, user);
     }
 
     public Boolean getLogin() {
