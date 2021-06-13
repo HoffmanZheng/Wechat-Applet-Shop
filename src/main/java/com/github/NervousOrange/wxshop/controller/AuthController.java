@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+
 @RestController
 @RequestMapping("/api/v1")
 public class AuthController {
@@ -92,13 +94,17 @@ public class AuthController {
      */
     @PostMapping("/login")
     public void login(@RequestBody TelAndCode telAndCode, HttpServletResponse response) {
-        UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(
-                telAndCode.getTel(), telAndCode.getCode());
-        usernamePasswordToken.setRememberMe(true);  // 存储 cookie，在一段时间内有效，不必重复登录
-        try {
-            SecurityUtils.getSubject().login(usernamePasswordToken);
-        } catch (IncorrectCredentialsException e) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
+        if (!telVerificationService.isTelParameterValid(telAndCode)) {
+            response.setStatus(HttpStatus.BAD_REQUEST.value());
+        } else {
+            UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(
+                    telAndCode.getTel(), telAndCode.getCode());
+            usernamePasswordToken.setRememberMe(true);  // 存储 cookie，在一段时间内有效，不必重复登录
+            try {
+                SecurityUtils.getSubject().login(usernamePasswordToken);
+            } catch (IncorrectCredentialsException e) {
+                response.setStatus(HttpStatus.FORBIDDEN.value());
+            }
         }
     }
 
@@ -135,21 +141,12 @@ public class AuthController {
      */
     @GetMapping("/status")
     public Response status(HttpServletResponse response) {
-        // TODO 从 UserContext 中取 User
-        /*String tel = (String) SecurityUtils.getSubject().getPrincipal();
-        if (tel == null) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return new Response("Unauthorized");
-        } else {
-            User user = userService.getUserByTel(tel);
-            return new Response(true, user);
-        }*/
         User currentUser = UserContext.getCurrentUser();
         if (currentUser != null) {
             return Response.loggedResponse(currentUser);
         } else {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return Response.notLoggedResponse("Unauthorized");
+            response.setStatus(UNAUTHORIZED.value());
+            return Response.notLoggedResponse(UNAUTHORIZED.getReasonPhrase());
         }
     }
 
@@ -176,8 +173,8 @@ public class AuthController {
     public Response logout(HttpServletResponse response) {
         String tel = (String) SecurityUtils.getSubject().getPrincipal();
         if (tel == null) {
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            return Response.notLoggedResponse("Unauthorized");
+            response.setStatus(UNAUTHORIZED.value());
+            return Response.notLoggedResponse(UNAUTHORIZED.getReasonPhrase());
         } else {
             SecurityUtils.getSubject().logout();
             return Response.emptyResponse();
@@ -188,6 +185,9 @@ public class AuthController {
         private String tel;
         private String code;
 
+        public TelAndCode() {
+        }
+
         public TelAndCode(String tel, String code) {
             this.tel = tel;
             this.code = code;
@@ -197,17 +197,10 @@ public class AuthController {
             return tel;
         }
 
-        public void setTel(String tel) {
-            this.tel = tel;
-        }
-
         public String getCode() {
             return code;
         }
 
-        public void setCode(String code) {
-            this.code = code;
-        }
     }
 }
 

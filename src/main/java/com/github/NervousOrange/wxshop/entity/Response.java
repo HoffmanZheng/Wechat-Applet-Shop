@@ -7,6 +7,7 @@ public class Response {
     private User user;
     private String message;
 
+    // 和 JSON 协同，需要一个空的构造器
     private Response() {
     }
 
@@ -36,23 +37,12 @@ public class Response {
         return login;
     }
 
-    public void setLogin(Boolean login) {
-        this.login = login;
-    }
-
     public User getUser() {
         return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
 }

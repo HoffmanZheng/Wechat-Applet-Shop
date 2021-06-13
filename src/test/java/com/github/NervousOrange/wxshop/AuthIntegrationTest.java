@@ -26,17 +26,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(SpringExtension.class)  // Spring 为 JUnit 5 提供的插件，可以在测试中使用 Spring 相关的功能，依赖注入等
 @SpringBootTest(classes = WxshopApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:application.yml")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class IntegrationTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)  // 集成测试顺序注解
+public class AuthIntegrationTest {
     @Autowired
     Environment environment;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private static BasicCookieStore cookieStore = new BasicCookieStore();
-    private static CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final BasicCookieStore cookieStore = new BasicCookieStore();
+    private static final CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
     private static String COOKIE;
 
     @Test
@@ -78,13 +78,32 @@ public class IntegrationTest {
         String responseString = initializeHTTPRequest(
                 true, "/api/v1/logout",
                 "", null, HttpStatus.UNAUTHORIZED.value());
-        Map map = objectMapper.readValue(responseString, Map.class);
+        Map<String, String> map = objectMapper.readValue(responseString, Map.class);
         String message = (String) map.get("message");
         Assertions.assertEquals("Unauthorized", message);
     }
 
     @Test
     @Order(5)
+    public void loginWithIncorrectParameter() throws IOException {
+        System.out.println("测试 —— 登录：输入无效手机号时返回 400 Bad Request");
+        String responseString = initializeHTTPRequest(
+                false, "/api/v1/login",
+                "", TelVerificationServiceTest.INVALID_TEL_PARAMETER,
+                HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @Order(6)
+    public void loginWithWrongPassword() throws IOException {
+        System.out.println("测试 —— 登录：错误的密码 返回 403 Forbidden");
+        String responseString = initializeHTTPRequest(
+                false, "/api/v1/login",
+                "", TelVerificationServiceTest.WRONG_LOGIN_PARAMETER, HttpStatus.FORBIDDEN.value());
+    }
+
+    @Test
+    @Order(7)
     public void successfulLogin() throws IOException {
         System.out.println("测试 —— 登录：成功返回 200 OK");
         String responseString = initializeHTTPRequest(
@@ -93,7 +112,7 @@ public class IntegrationTest {
     }
 
     @Test
-    @Order(6)
+    @Order(8)
     public void getStatusWhenUserIsLogged() throws IOException {
         System.out.println("测试 —— 获取登录状态：已登录返回 200 OK");
         String responseString = initializeHTTPRequest(
@@ -106,7 +125,7 @@ public class IntegrationTest {
     }
 
     @Test
-    @Order(7)
+    @Order(9)
     public void successfulLogout() throws IOException {
         System.out.println("测试 —— 登出：成功返回 200 OK");
         String responseString = initializeHTTPRequest(
@@ -115,21 +134,19 @@ public class IntegrationTest {
     }
 
     @Test
-    @Order(8)
-    public void comprehensiveTest() throws IOException {
-        getStatusWhenUserIsNotLogged();
-        failedLogout();
-        getCodeWithCorrectParameter();  // save info
-        getStatusWhenUserIsNotLogged();
+    @Order(10)
+    public void successfulLoginByCookie() throws IOException {
         successfulLoginReturnSetCookie();
         getStatusWhenUserIsLogged();
         successfulLogout();
         getStatusWhenUserIsNotLogged();
         successfulLoginWithCookie();
         getStatusWhenUserIsLogged();
+        successfulLogout();   // 要登出，这样 testLoginFilter 才能通过测试 返回 401
     }
 
-    @Test
+    @Test  // 测试过滤器前需要推出登录
+    @Order(11)
     public void testLoginFilter() throws IOException {
         System.out.println("测试 —— 匿名拦截器：未登录返回 401 Unauthorized");
         HttpGet httpGet = new HttpGet(getUrl("/api/v1/any"));
