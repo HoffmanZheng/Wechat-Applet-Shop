@@ -12,22 +12,27 @@
                         password="123456">
         </jdbcConnection>
 
+        <!-- Java 实体的生成配置 -->
         <javaModelGenerator targetPackage="com.github.NervousOrange.wxshop.generated" targetProject="src/main/java">
             <property name="enableSubPackages" value="true" />
             <property name="trimStrings" value="true" />
         </javaModelGenerator>
 
+        <!-- xml 生成配置 -->
         <sqlMapGenerator targetPackage="db.mybatis"  targetProject="src/main/resources">
             <property name="enableSubPackages" value="true" />
         </sqlMapGenerator>
 
+        <!-- 接口生成配置 -->
         <javaClientGenerator type="XMLMAPPER" targetPackage="com.github.NervousOrange.wxshop.generated"  targetProject="src/main/java">
             <property name="enableSubPackages" value="true" />
         </javaClientGenerator>
 
-        <table schema="wxshop" tableName="USER" domainObjectName="User" >
+        <!-- 具体的数据库表配置 -->
+        <table schema="wxshop" tableName="tb_user" domainObjectName="User" >
             <property name="useActualColumnNames" value="false"/>
-            <generatedKey column="ID" sqlStatement="Mysql" identity="true" />
+            <!-- 是否让数据库列名直接变成 Java 实体的属性, 否, snake case -> camel case -->
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
             <columnOverride column="avatar_url" property="avatarUrl" />
             <columnOverride column="created_at" property="createdAt" />
             <columnOverride column="modified_at" property="modifiedAt" />

@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Service
 public class VerificationCheckService {
-    private static ConcurrentHashMap<String, String> telToCorrectCode = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, String> telToCorrectCode = new ConcurrentHashMap<>();
 
     public void saveCorrectCode(String tel, String correctCode) {
         telToCorrectCode.put(tel, correctCode);

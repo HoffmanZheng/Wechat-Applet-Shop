@@ -20,8 +20,8 @@
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
         <module name="NeedBraces"/>
+        <!-- 因使用了专门的接口文档，取消对 Javadoc 的代码规范检查 -->
         <!--<module name="JavadocMethod">
-            <property name="allowUndeclaredRTE" value="true"/>
             <property name="scope" value="public" />
         </module>-->
         <module name="ModifierOrder"/>

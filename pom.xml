@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.2.6.RELEASE</version>
-		<!--<relativePath/>--> <!-- lookup parent from repository -->
+		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.github.NervousOrange</groupId>
 	<artifactId>wxshop</artifactId>
@@ -58,31 +58,29 @@
 			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- 安全框架 shiro, 用于身份验证、授权、密码和会话管理 -->
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-core</artifactId>
-			<version>1.5.3</version>
+			<version>1.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-spring</artifactId>
-			<version>1.5.3</version>
+			<version>1.7.0</version>
 		</dependency>
+		<!-- httpClient 用于集成测试，模拟发送 HTTP 请求 -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
-			<version>4.5.12</version>
+			<version>4.5.13</version>
 		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>2.7.0</version>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>2.7.0</version>
-		</dependency>
+		<!-- spotbugs 注解：用于忽略某些检查 -->
+		<!--<dependency>
+			<groupId>com.google.code.findbugs</groupId>
+			<artifactId>annotations</artifactId>
+			<version>3.0.1</version>
+		</dependency>-->
 	</dependencies>
 
 	<build>
@@ -91,19 +89,21 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!-- checkstyle 代码规范检查工具 -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.2</version>
 				<configuration>
 					<configLocation>${basedir}\src\main\resources\checkstyle.xml</configLocation>
 					<includeTestSourceDirectory>true</includeTestSourceDirectory>
 					<enableRulesSummary>false</enableRulesSummary>
-					<excludes>**/generated/**/*</excludes>
+					<excludes>**/generated/**/*</excludes> <!--检查时排除 mybatis generator 自动生成的代码-->
 				</configuration>
 				<executions>
 					<execution>
-						<id>verify</id>
-						<phase>verify</phase>
+						<id>compile</id>  <!-- 将 checkStyle 绑定到 maven compile 周期 -->
+						<phase>compile</phase>
 						<goals>
 							<goal>check</goal>
 						</goals>
@@ -113,16 +113,18 @@
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>8.22</version>
+						<version>8.29</version>
 					</dependency>
 				</dependencies>
 			</plugin>
+			<!-- spotbugs 发现潜在的 bug 风险 -->
 			<plugin>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-maven-plugin</artifactId>
 				<version>3.1.12</version>
 				<configuration>
-					<excludeFilterFile>ignore.xml</excludeFilterFile>
+					<!--检查时排除 mybatis generator 自动生成的代码-->
+					<excludeFilterFile>${basedir}\src\main\resources\ignore.xml</excludeFilterFile>
 				</configuration>
 				<dependencies>
 					<dependency>
@@ -133,7 +135,7 @@
 				</dependencies>
 				<executions>
 					<execution>
-						<id>verify</id>
+						<id>spotbugs</id>
 						<phase>verify</phase>
 						<goals>
 							<goal>check</goal>
@@ -141,10 +143,17 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!-- jacoco 代码测试覆盖率报告 -->
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.5</version>
+				<configuration>
+					<!-- 测试覆盖率报告中排除 mybatis generator 自动生成的代码 -->
+					<excludes>
+						<exclude>**/generated/**/*</exclude>
+					</excludes>
+				</configuration>
 				<executions>
 					<execution>
 						<id>default-prepare-agent</id>
@@ -153,6 +162,7 @@
 						</goals>
 					</execution>
 					<execution>
+						<!-- 会在 target/site/jacoco 目录下生成测试覆盖率报告 -->
 						<id>default-report</id>
 						<phase>verify</phase>
 						<goals>
@@ -173,7 +183,7 @@
 											<counter>COMPLEXITY</counter>
 											<value>COVEREDRATIO</value>
 											<!--测试覆盖率要求-->
-											<minimum>0.00</minimum>
+											<minimum>0.80</minimum>
 										</limit>
 									</limits>
 								</rule>
@@ -182,12 +192,14 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!--flyway 数据库自动迁移工具，且可以进行版本控制-->
 			<plugin>
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-maven-plugin</artifactId>
 				<version>6.4.1</version>
 				<configuration>
-					<url>jdbc:mysql://localhost:3306/wxshop</url>
+					<!-- 如果数据库不存在，就自动创建 createDatabaseIfNotExist=true -->
+					<url>jdbc:mysql://localhost:3306/wxshop?createDatabaseIfNotExist=true</url>
 					<user>root</user>
 					<password>123456</password>
 				</configuration>
@@ -199,10 +211,12 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<!-- mybatis generator 自动生成 dao 层 xml 文件 -->
 			<plugin>
 				<groupId>org.mybatis.generator</groupId>
 				<artifactId>mybatis-generator-maven-plugin</artifactId>
 				<version>1.4.0</version>
+                <!-- 给 mybatis generator 用的 mysql driver, 不加它自己找不到 -->
 				<dependencies>
 					<dependency>
 						<groupId>mysql</groupId>
@@ -211,6 +225,7 @@
 					</dependency>
 				</dependencies>
 				<configuration>
+					<!-- 如果要生成的类已经存在了，就重写覆盖，而不是生成新的文件 -->
 					<overwrite>true</overwrite>
 				</configuration>
 			</plugin>

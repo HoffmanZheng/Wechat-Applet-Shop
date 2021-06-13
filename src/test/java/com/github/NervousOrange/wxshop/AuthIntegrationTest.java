@@ -26,29 +26,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith(SpringExtension.class)  // Spring 为 JUnit 5 提供的插件，可以在测试中使用 Spring 相关的功能，依赖注入等
 @SpringBootTest(classes = WxshopApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestPropertySource(locations = "classpath:application.yml")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class IntegrationTest {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)  // 集成测试顺序注解
+public class AuthIntegrationTest {
     @Autowired
     Environment environment;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private static BasicCookieStore cookieStore = new BasicCookieStore();
-    private static CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final BasicCookieStore cookieStore = new BasicCookieStore();
+    private static final CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
     private static String COOKIE;
-
-    @Test
-    @Order(0)
-    public void testLoginFilter() throws IOException {
-        System.out.println("测试 —— 匿名拦截器：未登录返回 401 Unauthorized");
-        HttpGet httpGet = new HttpGet(getUrl("/api/v1/any"));
-        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
-            System.out.println(response.getStatusLine());
-            Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusLine().getStatusCode());
-        }
-    }
 
     @Test
     @Order(1)
@@ -89,13 +78,32 @@ public class IntegrationTest {
         String responseString = initializeHTTPRequest(
                 true, "/api/v1/logout",
                 "", null, HttpStatus.UNAUTHORIZED.value());
-        Map map = objectMapper.readValue(responseString, Map.class);
+        Map<String, String> map = objectMapper.readValue(responseString, Map.class);
         String message = (String) map.get("message");
         Assertions.assertEquals("Unauthorized", message);
     }
 
     @Test
     @Order(5)
+    public void loginWithIncorrectParameter() throws IOException {
+        System.out.println("测试 —— 登录：输入无效手机号时返回 400 Bad Request");
+        String responseString = initializeHTTPRequest(
+                false, "/api/v1/login",
+                "", TelVerificationServiceTest.INVALID_TEL_PARAMETER,
+                HttpStatus.BAD_REQUEST.value());
+    }
+
+    @Test
+    @Order(6)
+    public void loginWithWrongPassword() throws IOException {
+        System.out.println("测试 —— 登录：错误的密码 返回 403 Forbidden");
+        String responseString = initializeHTTPRequest(
+                false, "/api/v1/login",
+                "", TelVerificationServiceTest.WRONG_LOGIN_PARAMETER, HttpStatus.FORBIDDEN.value());
+    }
+
+    @Test
+    @Order(7)
     public void successfulLogin() throws IOException {
         System.out.println("测试 —— 登录：成功返回 200 OK");
         String responseString = initializeHTTPRequest(
@@ -104,7 +112,7 @@ public class IntegrationTest {
     }
 
     @Test
-    @Order(6)
+    @Order(8)
     public void getStatusWhenUserIsLogged() throws IOException {
         System.out.println("测试 —— 获取登录状态：已登录返回 200 OK");
         String responseString = initializeHTTPRequest(
@@ -117,7 +125,7 @@ public class IntegrationTest {
     }
 
     @Test
-    @Order(7)
+    @Order(9)
     public void successfulLogout() throws IOException {
         System.out.println("测试 —— 登出：成功返回 200 OK");
         String responseString = initializeHTTPRequest(
@@ -126,71 +134,27 @@ public class IntegrationTest {
     }
 
     @Test
-    @Order(8)
-    public void getStatusAfterLogOut() throws IOException {
-        System.out.println("测试 —— 登出后获取登录状态：返回 401 Unauthorized");
-        String responseString = initializeHTTPRequest(
-                true, "/api/v1/status",
-                "", null, HttpStatus.UNAUTHORIZED.value());
-        Map map = objectMapper.readValue(responseString, Map.class);
-        String message = (String) map.get("message");
-        Assertions.assertEquals("Unauthorized", message);
-    }
-
-    @Test
-    @Order(9)
-    public void comprehensiveCookieTest() throws IOException {
+    @Order(10)
+    public void successfulLoginByCookie() throws IOException {
         successfulLoginReturnSetCookie();
         getStatusWhenUserIsLogged();
-        getStatusWithoutCookie();  // clear cookie in this step
-        getStatusWithCookie();
-        failedLogout();  // failedLogout without cookie
-        successfulLogoutWithCookie();
-        getStatusWithExpiredCookie();  // cookie expired after logout
+        successfulLogout();
+        getStatusWhenUserIsNotLogged();
+        successfulLoginWithCookie();
+        getStatusWhenUserIsLogged();
+        successfulLogout();   // 要登出，这样 testLoginFilter 才能通过测试 返回 401
     }
 
-    private void getStatusWithExpiredCookie() throws IOException {
-        System.out.println("用已经过期的 cookie 获取登录状态：返回 401 Unauthorized");
-        HttpGet httpGet = new HttpGet(getUrl("/api/v1/status"));
-        httpGet.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpGet.setHeader("Cookie", "JSESSIONID=" + COOKIE);
+    @Test  // 测试过滤器前需要推出登录
+    @Order(11)
+    public void testLoginFilter() throws IOException {
+        System.out.println("测试 —— 匿名拦截器：未登录返回 401 Unauthorized");
+        HttpGet httpGet = new HttpGet(getUrl("/api/v1/any"));
         try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
             System.out.println(response.getStatusLine());
             Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusLine().getStatusCode());
-            String responseString = EntityUtils.toString(response.getEntity());
-            Map map = objectMapper.readValue(responseString, Map.class);
-            String message = (String) map.get("message");
-            Assertions.assertEquals("Unauthorized", message);
-
         }
     }
-
-    private void successfulLogoutWithCookie() throws IOException {
-        System.out.println("用 cookie 登出：返回 200 OK");
-        HttpGet httpGet = new HttpGet(getUrl("/api/v1/logout"));
-        httpGet.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpGet.setHeader("Cookie", "JSESSIONID=" + COOKIE);
-        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
-            System.out.println(response.getStatusLine());
-            Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusLine().getStatusCode());
-        }
-    }
-
-    private void getStatusWithoutCookie() throws IOException {
-        System.out.println("不用用 Cookie 登录：返回 401 Unauthorized");
-        HttpGet httpGet = new HttpGet(getUrl("/api/v1/status"));
-        httpGet.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        cookieStore.clear();
-        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
-            System.out.println(response.getStatusLine());
-            Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusLine().getStatusCode());
-            String responseString = EntityUtils.toString(response.getEntity());
-            Map map = objectMapper.readValue(responseString, Map.class);
-            String message = (String) map.get("message");
-            Assertions.assertEquals("Unauthorized", message);
-        }
-    }
-
 
     public void successfulLoginReturnSetCookie() throws IOException {
         System.out.println("登录 —— 获取 cookie");
@@ -202,26 +166,22 @@ public class IntegrationTest {
             response = httpclient.execute(httpPost);
             System.out.println(response.getStatusLine());
             List<Cookie> cookies = cookieStore.getCookies();
-            System.out.println(objectMapper.writeValueAsString(cookies));
+            // System.out.println(objectMapper.writeValueAsString(cookies));
             COOKIE = cookies.get(0).getValue();
         } finally {
             Objects.requireNonNull(response).close();
         }
     }
 
-    private void getStatusWithCookie() throws IOException {
-        System.out.println("用 cookie 获取登录状态：已登录返回 200 OK，且返回登录的用户信息");
-        HttpGet httpGet = new HttpGet(getUrl("/api/v1/status"));
-        httpGet.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpGet.setHeader("Cookie", "JSESSIONID=" + COOKIE);
-        try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
+    private void successfulLoginWithCookie() throws IOException {
+        System.out.println("用 Cookie 登录：成功返回 200 OK");
+        HttpPost httpPost = new HttpPost(getUrl("/api/v1/login"));
+        httpPost.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.setHeader("Cookie", COOKIE);
+        httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(TelVerificationServiceTest.VALID_TEL_PARAMETER)));
+        try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
             System.out.println(response.getStatusLine());
             Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusLine().getStatusCode());
-            String responseString = EntityUtils.toString(response.getEntity());
-            Map map = objectMapper.readValue(responseString, Map.class);
-            Assertions.assertTrue((Boolean) map.get("login"));
-            Map userMap = (Map) map.get("user");
-            Assertions.assertEquals(TelVerificationServiceTest.VALID_TEL_PARAMETER.getTel(), userMap.get("tel"));
         }
     }
 
@@ -230,7 +190,7 @@ public class IntegrationTest {
     }
 
     private String initializeHTTPRequest(boolean isGet, String urlInterface,
-                                         String requestParam, Object requestBody, int expectedHttpStatus) throws IOException {
+        String requestParam, Object requestBody, int expectedHttpStatus) throws IOException {
         if (isGet) {
             HttpGet httpGet = new HttpGet(getUrl(urlInterface) + requestParam);
             try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
