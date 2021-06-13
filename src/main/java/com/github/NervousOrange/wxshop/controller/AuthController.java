@@ -56,6 +56,7 @@ public class AuthController {
     @PostMapping("/code")
     public void code(@RequestBody TelAndCode telAndCode, HttpServletResponse response) {
         if (telVerificationService.isTelParameterValid(telAndCode)) {
+            // 查看数据库中该用户是否存在，如果不存在就创建
             authService.sendVerificationCode(telAndCode.getTel());
         } else {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -93,13 +94,12 @@ public class AuthController {
     public void login(@RequestBody TelAndCode telAndCode, HttpServletResponse response) {
         UsernamePasswordToken usernamePasswordToken = new UsernamePasswordToken(
                 telAndCode.getTel(), telAndCode.getCode());
-        usernamePasswordToken.setRememberMe(true);
+        usernamePasswordToken.setRememberMe(true);  // 存储 cookie，在一段时间内有效，不必重复登录
         try {
             SecurityUtils.getSubject().login(usernamePasswordToken);
         } catch (IncorrectCredentialsException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
         }
-
     }
 
     /**

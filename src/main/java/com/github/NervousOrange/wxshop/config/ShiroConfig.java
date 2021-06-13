@@ -40,6 +40,7 @@ public class ShiroConfig implements WebMvcConfigurer {
 
         Map<String, String> pattern = new HashMap<>();
         pattern.put("/api/v1/logout", "anon");
+        // 登录和获取验证码的接口，可以匿名访问，不设置过滤器
         pattern.put("/api/v1/login", "anon");
         pattern.put("/api/v1/code", "anon");
         pattern.put("/api/v1/status", "anon");
@@ -50,8 +51,10 @@ public class ShiroConfig implements WebMvcConfigurer {
 
     @Bean
     public SecurityManager securityManager(ShiroRealm shiroRealm) {
+        // WebSecurityManager 提供 cookie 和 session 支持
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         securityManager.setRealm(shiroRealm);
+        // TODO：内存受限的缓存，未来换成 redis
         securityManager.setCacheManager(new MemoryConstrainedCacheManager());
         securityManager.setSessionManager(new DefaultWebSessionManager());
         SecurityUtils.setSecurityManager(securityManager);

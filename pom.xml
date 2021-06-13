@@ -58,6 +58,7 @@
 			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- 安全框架 shiro, 用于身份验证、授权、密码和会话管理 -->
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
 			<artifactId>shiro-core</artifactId>
@@ -83,8 +84,9 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>3.0.0</version>
+				<version>3.1.2</version>
 				<configuration>
 					<configLocation>${basedir}\src\main\resources\checkstyle.xml</configLocation>
 					<includeTestSourceDirectory>true</includeTestSourceDirectory>
@@ -173,12 +175,14 @@
 					</execution>
 				</executions>
 			</plugin>
+			<!--flyway 数据库自动建表，且可以进行版本控制-->
 			<plugin>
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-maven-plugin</artifactId>
 				<version>6.4.1</version>
 				<configuration>
-					<url>jdbc:mysql://localhost:3306/wxshop</url>
+					<!-- 如果数据库不存在，就自动创建 createDatabaseIfNotExist=true -->
+					<url>jdbc:mysql://localhost:3306/wxshop?createDatabaseIfNotExist=true</url>
 					<user>root</user>
 					<password>123456</password>
 				</configuration>
@@ -190,10 +194,12 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<!-- mybatis generator 自动生成 dao 层 xml 文件 -->
 			<plugin>
 				<groupId>org.mybatis.generator</groupId>
 				<artifactId>mybatis-generator-maven-plugin</artifactId>
 				<version>1.4.0</version>
+                <!-- 给 mybatis generator 用的 mysql driver, 不加它自己找不到 -->
 				<dependencies>
 					<dependency>
 						<groupId>mysql</groupId>

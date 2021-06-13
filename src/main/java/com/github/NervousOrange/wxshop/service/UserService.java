@@ -14,7 +14,7 @@ public class UserService {
 
 
     @Autowired
-    public UserService(UserDao userDao, MockSmsCodeService mockSmsCodeService, VerificationCheckService verificationCheckService) {
+    public UserService(UserDao userDao) {
         this.userDao = userDao;
     }
 
