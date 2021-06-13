@@ -1,9 +1,12 @@
-create table SHOP(
+create table tb_goods(
 id int primary key auto_increment,
-`name` varchar(100),
+shop_id int,
+name varchar(100),
 description varchar(1024),
+details text,
 img_url varchar(1024),
-owner_user_id int,
+price decimal,
+stock int not null default 0,
 status varchar(16),
 created_at timestamp not null default current_timestamp,
 modified_at timestamp not null default current_timestamp

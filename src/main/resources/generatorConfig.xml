@@ -33,53 +33,35 @@
             <property name="useActualColumnNames" value="false"/>
             <!-- 是否让数据库列名直接变成 Java 实体的属性, 否, snake case -> camel case -->
             <generatedKey column="id" sqlStatement="Mysql" identity="true" />
-            <columnOverride column="avatar_url" property="avatarUrl" />
+            <!-- useActualColumnNames=false 已经可以将数据库中的 snake_case 转换成 Java 中的 Camel_case 了，下同 -->
+            <!--<columnOverride column="avatar_url" property="avatarUrl" />
             <columnOverride column="created_at" property="createdAt" />
-            <columnOverride column="modified_at" property="modifiedAt" />
+            <columnOverride column="modified_at" property="modifiedAt" />-->
         </table>
 
-        <table schema="wxshop" tableName="GOODS" domainObjectName="Goods" >
+        <table schema="wxshop" tableName="tb_goods" domainObjectName="Goods" >
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="id" sqlStatement="Mysql" identity="true" />
-            <columnOverride column="shop_id" property="shopId" />
-            <columnOverride column="img_url" property="imgUrl" />
-            <columnOverride column="created_at" property="createdAt" />
-            <columnOverride column="modified_at" property="modifiedAt" />
         </table>
 
-        <table schema="wxshop" tableName="ORDER" domainObjectName="Order" >
+        <table schema="wxshop" tableName="tb_order" domainObjectName="Order" >
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="id" sqlStatement="Mysql" identity="true" />
-            <columnOverride column="user_id" property="userId" />
-            <columnOverride column="total_price" property="totalPrice" />
-            <columnOverride column="express_company" property="expressCompany" />
-            <columnOverride column="express_id" property="expressId" />
-            <columnOverride column="created_at" property="createdAt" />
-            <columnOverride column="modified_at" property="modifiedAt" />
         </table>
 
-        <table schema="wxshop" tableName="ORDER_GOODS" domainObjectName="OrderGoods" >
+        <table schema="wxshop" tableName="tb_order_goods" domainObjectName="OrderGoods" >
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="id" sqlStatement="Mysql" identity="true" />
-            <columnOverride column="goods_id" property="GoodsId" />
         </table>
 
-        <table schema="wxshop" tableName="SHOP" domainObjectName="Shop" >
+        <table schema="wxshop" tableName="tb_shop" domainObjectName="Shop" >
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="id" sqlStatement="Mysql" identity="true" />
-            <columnOverride column="img_url" property="imgUrl" />
-            <columnOverride column="owner_user_id" property="ownerUserId" />
-            <columnOverride column="created_at" property="createdAt" />
-            <columnOverride column="modified_at" property="modifiedAt" />
         </table>
 
-        <table schema="wxshop" tableName="SHOPPING_CART" domainObjectName="ShoppingCart" >
+        <table schema="wxshop" tableName="tb_shopping_cart" domainObjectName="ShoppingCart" >
             <property name="useActualColumnNames" value="false"/>
             <generatedKey column="id" sqlStatement="Mysql" identity="true" />
-            <columnOverride column="user_id" property="userId" />
-            <columnOverride column="goods_id" property="goodsId" />
-            <columnOverride column="created_at" property="createdAt" />
-            <columnOverride column="modified_at" property="modifiedAt" />
         </table>
 
     </context>

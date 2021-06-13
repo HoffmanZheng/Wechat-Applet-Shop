@@ -1,4 +1,4 @@
-create table `ORDER`(
+create table tb_order(
 id int primary key auto_increment,
 user_id int,
 total_price decimal,
@@ -10,7 +10,7 @@ created_at timestamp not null default current_timestamp,
 modified_at timestamp not null default current_timestamp
 );
 
-create table ORDER_GOODS
+create table tb_order_goods
 (
 id int primary key auto_increment,
 goods_id int,
