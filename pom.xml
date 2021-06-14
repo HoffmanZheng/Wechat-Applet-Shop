@@ -74,6 +74,7 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.13</version>
+			<scope>test</scope>
 		</dependency>
 		<!-- spotbugs 注解：用于忽略某些检查 -->
 		<!--<dependency>
@@ -81,6 +82,12 @@
 			<artifactId>annotations</artifactId>
 			<version>3.0.1</version>
 		</dependency>-->
+		<!-- 分页插件 -->
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper</artifactId>
+			<version>5.2.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -183,7 +190,7 @@
 											<counter>COMPLEXITY</counter>
 											<value>COVEREDRATIO</value>
 											<!--测试覆盖率要求-->
-											<minimum>0.80</minimum>
+											<minimum>0.50</minimum>
 										</limit>
 									</limits>
 								</rule>
@@ -199,7 +206,7 @@
 				<version>6.4.1</version>
 				<configuration>
 					<!-- 如果数据库不存在，就自动创建 createDatabaseIfNotExist=true -->
-					<url>jdbc:mysql://localhost:3306/wxshop?createDatabaseIfNotExist=true</url>
+					<url>jdbc:mysql://localhost:3306/wxshop?createDatabaseIfNotExist=true&amp;characterEncoding=utf-8</url>
 					<user>root</user>
 					<password>123456</password>
 				</configuration>

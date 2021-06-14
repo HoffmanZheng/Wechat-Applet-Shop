@@ -39,15 +39,11 @@ public class ShiroConfig implements WebMvcConfigurer {
         shiroFilterFactoryBean.setFilters(filterMap);
 
         Map<String, String> pattern = new HashMap<>();
-        pattern.put("/api/v1/logout", "anon");
         // 登录和获取验证码的接口，可以匿名访问，不设置过滤器
+        pattern.put("/api/v1/logout", "anon");
         pattern.put("/api/v1/login", "anon");
         pattern.put("/api/v1/code", "anon");
         pattern.put("/api/v1/status", "anon");
-        pattern.put("/swagger-ui.html/**", "anon");
-        pattern.put("/swagger-resources/**", "anon");
-        pattern.put("/webjars/**", "anon");
-        pattern.put("/v2/**", "anon");
         pattern.put("/**", "authc");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(pattern);
         return shiroFilterFactoryBean;

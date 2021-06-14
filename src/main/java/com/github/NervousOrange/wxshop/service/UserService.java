@@ -18,13 +18,12 @@ public class UserService {
         this.userDao = userDao;
     }
 
-    public User createUserIfNotExist(String tel) {
+    public void createUserIfNotExist(String tel) {
         try {
             userDao.createUserIfNotExist(tel);
         } catch (PersistenceException e) {
             System.out.println("用户已经存在");
         }
-        return userDao.loadUserByTel(tel);
     }
 
     public Optional<User> getUserByTel(String tel) {

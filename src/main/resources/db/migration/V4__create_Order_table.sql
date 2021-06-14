@@ -8,11 +8,11 @@ express_id varchar(128),
 status varchar(16),
 created_at timestamp not null default current_timestamp,
 modified_at timestamp not null default current_timestamp
-);
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 create table tb_order_goods
 (
 id int primary key auto_increment,
 goods_id int,
 number decimal
-)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;

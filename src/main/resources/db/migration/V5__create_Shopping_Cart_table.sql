@@ -7,4 +7,4 @@ CREATE TABLE tb_shopping_cart
     status     VARCHAR(16),
     created_at TIMESTAMP NOT NULL DEFAULT current_timestamp,
     modified_at TIMESTAMP NOT NULL DEFAULT current_timestamp
-)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;

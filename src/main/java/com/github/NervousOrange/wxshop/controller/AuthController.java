@@ -32,7 +32,8 @@ public class AuthController {
     }
 
     /**
-     * @api {post} /code 使用手机号，请求验证码
+     * @api {post} /code 请求验证码
+     * @apiSampleRequest off
      * @apiName code
      * @apiGroup 登录与鉴权
      *
@@ -67,6 +68,7 @@ public class AuthController {
 
     /**
      * @api {post} /login 登录
+     * @apiSampleRequest off
      * @apiName login
      * @apiGroup 登录与鉴权
      *
@@ -110,6 +112,7 @@ public class AuthController {
 
     /**
      * @api {get} /status 获取登录状态
+     * @apiSampleRequest off
      * @apiName status
      * @apiGroup 登录与鉴权
      *
@@ -152,6 +155,7 @@ public class AuthController {
 
     /**
      * @api {get} /logout 登出
+     * @apiSampleRequest off
      * @apiName logout
      * @apiGroup 登录与鉴权
      *

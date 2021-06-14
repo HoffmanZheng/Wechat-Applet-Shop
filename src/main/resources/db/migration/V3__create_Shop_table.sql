@@ -7,4 +7,4 @@ owner_user_id int,
 status varchar(16),
 created_at timestamp not null default current_timestamp,
 modified_at timestamp not null default current_timestamp
-)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
