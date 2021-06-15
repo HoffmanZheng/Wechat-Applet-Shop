@@ -76,6 +76,14 @@
 			<version>4.5.13</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- flyway Java Api 在集成测试中用于初始化数据库 -->
+		<!-- 使用 6.x.x 版本，参见：https://github.com/flyway/flyway/issues/2962 -->
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+			<version>6.5.7</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- spotbugs 注解：用于忽略某些检查 -->
 		<!--<dependency>
 			<groupId>com.google.code.findbugs</groupId>

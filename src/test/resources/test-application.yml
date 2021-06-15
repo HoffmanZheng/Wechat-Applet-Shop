@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/wxshop?characterEncoding=utf-8
+    url: jdbc:mysql://localhost:3307/wxshop?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&characterEncoding=utf-8
     username: root
     password: 123456
     driverClassName: com.mysql.cj.jdbc.Driver

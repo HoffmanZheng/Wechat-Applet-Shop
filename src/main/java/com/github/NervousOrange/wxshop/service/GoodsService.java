@@ -29,6 +29,9 @@ public class GoodsService {
     public Goods createGoods(Goods goods) {
         // 对 shopId 做校验，请求者需要是店铺的所有者
         Shop shop = shopMapper.selectByPrimaryKey(goods.getShopId());
+        if (shop == null) {
+            throw new DataNotFoundException(String.format("店铺不存在: shopId = [%s]", goods.getShopId()));
+        }
         if (!shop.getOwnerUserId().equals(UserContext.getCurrentUser().getId())) {
             throw new ShopNotAuthorizedException(SHOP_NOT_AUTHORIZED);
         } else {

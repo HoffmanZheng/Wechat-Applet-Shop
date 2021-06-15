@@ -41,7 +41,7 @@ public class AuthController {
      * @apiHeader {String} Content-Type application/json
      *
      * @apiParam {String} tel 手机号码
-     * @apiParamExample {json} Request-Example:
+     * @apiParamExample {json} Restatusquest-Example:
      *          {
      *              "tel": "13812345678"
      *          }

@@ -1,24 +1,14 @@
 package com.github.NervousOrange.wxshop;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.NervousOrange.wxshop.service.TelVerificationServiceTest;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
@@ -26,25 +16,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@ExtendWith(SpringExtension.class)  // Spring 为 JUnit 5 提供的插件，可以在测试中使用 Spring 相关的功能，依赖注入等
-@SpringBootTest(classes = WxshopApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "classpath:application.yml")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)  // 集成测试顺序注解
-public class AuthIntegrationTest {
-    @Autowired
-    Environment environment;
+import static com.github.NervousOrange.wxshop.TestConstant.HTTP_GET;
+import static com.github.NervousOrange.wxshop.TestConstant.HTTP_POST;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private static final BasicCookieStore cookieStore = new BasicCookieStore();
-    private static final CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
-    private static String COOKIE;
+@ExtendWith(SpringExtension.class)  // Spring 为 JUnit 5 提供的插件，可以在测试中使用 Spring 相关的功能，依赖注入等
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)  // 集成测试顺序注解
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)   // @BeforeAll 需要是 PER_CLASS
+// Shared test instance state between test methods as well as between non-static @BeforeAll and @AfterAll methods in the test class.
+public class AuthIntegrationTest extends AbstractIntegrationTest {
+
+    @BeforeAll
+    public void initDatabase() {
+        initDataBase();
+    }
 
     @Test
     @Order(1)
     public void getStatusWhenUserIsNotLogged() throws IOException {
         System.out.println("测试 —— 获取登录状态：未登录返回 401 Unauthorized");
         String responseString = initializeHTTPRequest(
-                true, "/api/v1/status",
+                HTTP_GET, "/api/v1/status",
                 "", null, HttpStatus.UNAUTHORIZED.value());
         Map map = objectMapper.readValue(responseString, Map.class);
         String message = (String) map.get("message");
@@ -56,7 +47,7 @@ public class AuthIntegrationTest {
     public void getCodeWithIncorrectParameter() throws IOException {
         System.out.println("测试 —— 请求手机验证码：输入无效手机号时返回 400 Bad Request");
         String responseString = initializeHTTPRequest(
-                false, "/api/v1/code",
+                HTTP_POST, "/api/v1/code",
                 "", TelVerificationServiceTest.INVALID_TEL_PARAMETER,
                 HttpStatus.BAD_REQUEST.value());
     }
@@ -66,7 +57,7 @@ public class AuthIntegrationTest {
     public void getCodeWithCorrectParameter() throws IOException {
         System.out.println("测试 —— 请求手机验证码：输入参数正确时返回 200 OK");
         String responseString = initializeHTTPRequest(
-                false, "/api/v1/code",
+                HTTP_POST, "/api/v1/code",
                 "", TelVerificationServiceTest.VALID_TEL_PARAMETER,
                 HttpStatus.OK.value());
     }
@@ -76,7 +67,7 @@ public class AuthIntegrationTest {
     public void failedLogout() throws IOException {
         System.out.println("测试 —— 登出：失败返回 401 Unauthorized");
         String responseString = initializeHTTPRequest(
-                true, "/api/v1/logout",
+                HTTP_GET, "/api/v1/logout",
                 "", null, HttpStatus.UNAUTHORIZED.value());
         Map<String, String> map = objectMapper.readValue(responseString, Map.class);
         String message = (String) map.get("message");
@@ -88,7 +79,7 @@ public class AuthIntegrationTest {
     public void loginWithIncorrectParameter() throws IOException {
         System.out.println("测试 —— 登录：输入无效手机号时返回 400 Bad Request");
         String responseString = initializeHTTPRequest(
-                false, "/api/v1/login",
+                HTTP_POST, "/api/v1/login",
                 "", TelVerificationServiceTest.INVALID_TEL_PARAMETER,
                 HttpStatus.BAD_REQUEST.value());
     }
@@ -98,7 +89,7 @@ public class AuthIntegrationTest {
     public void loginWithWrongPassword() throws IOException {
         System.out.println("测试 —— 登录：错误的密码 返回 403 Forbidden");
         String responseString = initializeHTTPRequest(
-                false, "/api/v1/login",
+                HTTP_POST, "/api/v1/login",
                 "", TelVerificationServiceTest.WRONG_LOGIN_PARAMETER, HttpStatus.FORBIDDEN.value());
     }
 
@@ -107,7 +98,7 @@ public class AuthIntegrationTest {
     public void successfulLogin() throws IOException {
         System.out.println("测试 —— 登录：成功返回 200 OK");
         String responseString = initializeHTTPRequest(
-                false, "/api/v1/login",
+                HTTP_POST, "/api/v1/login",
                 "", TelVerificationServiceTest.VALID_TEL_PARAMETER, HttpStatus.OK.value());
     }
 
@@ -116,7 +107,7 @@ public class AuthIntegrationTest {
     public void getStatusWhenUserIsLogged() throws IOException {
         System.out.println("测试 —— 获取登录状态：已登录返回 200 OK");
         String responseString = initializeHTTPRequest(
-                true, "/api/v1/status",
+                HTTP_GET, "/api/v1/status",
                 "", null, HttpStatus.OK.value());
         Map map = objectMapper.readValue(responseString, Map.class);
         Assertions.assertTrue((Boolean) map.get("login"));
@@ -129,7 +120,7 @@ public class AuthIntegrationTest {
     public void successfulLogout() throws IOException {
         System.out.println("测试 —— 登出：成功返回 200 OK");
         String responseString = initializeHTTPRequest(
-                true, "/api/v1/logout",
+                HTTP_GET, "/api/v1/logout",
                 "", null, HttpStatus.OK.value());
     }
 
@@ -145,15 +136,16 @@ public class AuthIntegrationTest {
         successfulLogout();   // 要登出，这样 testLoginFilter 才能通过测试 返回 401
     }
 
-    @Test  // 测试过滤器前需要推出登录
+    @Test  // 测试过滤器前需要退出登录
     @Order(11)
     public void testLoginFilter() throws IOException {
         System.out.println("测试 —— 匿名拦截器：未登录返回 401 Unauthorized");
-        HttpGet httpGet = new HttpGet(getUrl("/api/v1/any"));
+        initializeHTTPRequest(HTTP_GET, "/api/v1/any", null, null, HttpStatus.UNAUTHORIZED.value());
+        /*HttpGet httpGet = new HttpGet(getUrl("/api/v1/any"));
         try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
             System.out.println(response.getStatusLine());
             Assertions.assertEquals(HttpStatus.UNAUTHORIZED.value(), response.getStatusLine().getStatusCode());
-        }
+        }*/
     }
 
     public void successfulLoginReturnSetCookie() throws IOException {
@@ -182,35 +174,6 @@ public class AuthIntegrationTest {
         try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
             System.out.println(response.getStatusLine());
             Assertions.assertEquals(HttpStatus.OK.value(), response.getStatusLine().getStatusCode());
-        }
-    }
-
-    public String getUrl(String apiName) {
-        return "http://localhost:" + environment.getProperty("local.server.port") + apiName;
-    }
-
-    private String initializeHTTPRequest(boolean isGet, String urlInterface,
-        String requestParam, Object requestBody, int expectedHttpStatus) throws IOException {
-        if (isGet) {
-            HttpGet httpGet = new HttpGet(getUrl(urlInterface) + requestParam);
-            try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
-                System.out.println(response.getStatusLine());
-                Assertions.assertEquals(expectedHttpStatus, response.getStatusLine().getStatusCode());
-                String responseString = EntityUtils.toString(response.getEntity());
-                System.out.println(responseString);
-                return responseString;
-            }
-        } else {
-            HttpPost httpPost = new HttpPost(getUrl(urlInterface));
-            httpPost.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-            httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(requestBody)));
-            try (CloseableHttpResponse response = httpclient.execute(httpPost)) {
-                System.out.println(response.getStatusLine());
-                Assertions.assertEquals(expectedHttpStatus, response.getStatusLine().getStatusCode());
-                String responseString = EntityUtils.toString(response.getEntity());
-                System.out.println(responseString);
-                return responseString;
-            }
         }
     }
 }
