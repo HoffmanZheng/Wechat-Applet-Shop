@@ -19,6 +19,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestController
 @RequestMapping("/api/v1")
+@ResponseBody
 public class AuthController {
     private final AuthService authService;
     private final TelVerificationService telVerificationService;

@@ -140,7 +140,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Order(11)
     public void testLoginFilter() throws IOException {
         System.out.println("测试 —— 匿名拦截器：未登录返回 401 Unauthorized");
-        initializeHTTPRequest(HTTP_GET, "/api/v1/any", null, null, HttpStatus.UNAUTHORIZED.value());
+        initializeHTTPRequest(HTTP_GET, "/api/v1/any", "", null, HttpStatus.UNAUTHORIZED.value());
         /*HttpGet httpGet = new HttpGet(getUrl("/api/v1/any"));
         try (CloseableHttpResponse response = httpclient.execute(httpGet)) {
             System.out.println(response.getStatusLine());

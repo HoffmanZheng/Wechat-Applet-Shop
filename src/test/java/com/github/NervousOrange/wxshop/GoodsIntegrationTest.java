@@ -1,7 +1,6 @@
 package com.github.NervousOrange.wxshop;
 
 import com.github.NervousOrange.wxshop.generated.Goods;
-import com.github.NervousOrange.wxshop.generated.Shop;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -11,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.github.NervousOrange.wxshop.ShopIntegrationTest.TEST_SHOP;
@@ -42,11 +42,11 @@ public class GoodsIntegrationTest extends AbstractIntegrationTest {
     private int createShopBeforeGoodsTest() throws IOException {
         String responseString = initializeHTTPRequest(
                 HTTP_POST, "/api/v1/shop",
-                null, TEST_SHOP, HttpStatus.OK.value());
+                "", TEST_SHOP, HttpStatus.OK.value());
         Map map = objectMapper.readValue(responseString, Map.class);
-        Shop shop = (Shop) map.get("data");
-        Assertions.assertNotNull(shop);
-        return shop.getId();
+        Map<String, Object> shopMap = (HashMap<String, Object>) map.get("data");
+        Assertions.assertNotNull(shopMap);
+        return (int) shopMap.get("id");
     }
 
     @Test
@@ -56,19 +56,19 @@ public class GoodsIntegrationTest extends AbstractIntegrationTest {
         TEST_GOODS.setShopId(shopId);
         String responseString = initializeHTTPRequest(
                 HTTP_POST, "/api/v1/goods",
-                null, TEST_GOODS, HttpStatus.CREATED.value());
+                "", TEST_GOODS, HttpStatus.CREATED.value());
         Map map = objectMapper.readValue(responseString, Map.class);
-        Goods goods = (Goods) map.get("data");
-        Assertions.assertNotNull(goods.getId());
-        Assertions.assertNotNull(goods.getCreatedAt());
-        Assertions.assertNotNull(goods.getUpdatedAt());
-        Assertions.assertEquals(TEST_GOODS.getName(), goods.getName());
-        Assertions.assertEquals(TEST_GOODS.getDescription(), goods.getDescription());
-        Assertions.assertEquals(TEST_GOODS.getDetails(), goods.getDetails());
-        Assertions.assertEquals(TEST_GOODS.getImgUrl(), goods.getImgUrl());
-        Assertions.assertEquals(TEST_GOODS.getPrice(), goods.getPrice());
-        Assertions.assertEquals(TEST_GOODS.getStock(), goods.getStock());
-        Assertions.assertEquals(TEST_GOODS.getShopId(), goods.getShopId());
+        Map<String, String> goodsMap = (Map<String, String>) map.get("data");
+        Assertions.assertNotNull(goodsMap.get("id"));
+        Assertions.assertNotNull(goodsMap.get("createdAt"));
+        Assertions.assertNotNull(goodsMap.get("updatedAt"));
+        Assertions.assertEquals(TEST_GOODS.getName(), goodsMap.get("name"));
+        Assertions.assertEquals(TEST_GOODS.getDescription(), goodsMap.get("description"));
+        Assertions.assertEquals(TEST_GOODS.getDetails(), goodsMap.get("details"));
+        Assertions.assertEquals(TEST_GOODS.getImgUrl(), goodsMap.get("imgUrl"));
+        Assertions.assertEquals(TEST_GOODS.getPrice(), Long.parseLong(goodsMap.get("price")));
+        Assertions.assertEquals(TEST_GOODS.getStock(), Integer.parseInt(goodsMap.get("stock")));
+        Assertions.assertEquals(TEST_GOODS.getShopId(), Integer.parseInt(goodsMap.get("shopId")));
         logoutAfterFunctionalTest();
     }
 
@@ -79,7 +79,7 @@ public class GoodsIntegrationTest extends AbstractIntegrationTest {
         TEST_GOODS.setShopId(anotherShopId);
         String responseString = initializeHTTPRequest(
                 HTTP_POST, "/api/v1/goods",
-                null, TEST_GOODS, HttpStatus.FORBIDDEN.value());
+                "", TEST_GOODS, HttpStatus.FORBIDDEN.value());
         Map map = objectMapper.readValue(responseString, Map.class);
         String message = (String) map.get("message");
         Assertions.assertEquals(SHOP_NOT_AUTHORIZED, message);
@@ -91,10 +91,7 @@ public class GoodsIntegrationTest extends AbstractIntegrationTest {
         // 没有登录去创建商品
         TEST_GOODS.setShopId(shopId);
         String responseString = initializeHTTPRequest(HTTP_POST, "/api/v1/goods",
-                null, TEST_GOODS, HttpStatus.UNAUTHORIZED.value());
-        Map map = objectMapper.readValue(responseString, Map.class);
-        String message = (String) map.get("message");
-        Assertions.assertEquals(HttpStatus.UNAUTHORIZED.getReasonPhrase(), message);
+                "", TEST_GOODS, HttpStatus.UNAUTHORIZED.value());
     }
 
 

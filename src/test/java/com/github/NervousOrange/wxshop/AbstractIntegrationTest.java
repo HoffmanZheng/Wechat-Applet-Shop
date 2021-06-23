@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 
@@ -54,27 +55,28 @@ public class AbstractIntegrationTest {
     }
 
     protected void loginBeforeFunctionalTest() throws IOException {
-        initializeHTTPRequest(HTTP_POST, "/api/v1/code", null,
+        initializeHTTPRequest(HTTP_POST, "/api/v1/code", "",
                 TelVerificationServiceTest.VALID_TEL_PARAMETER, HttpStatus.OK.value());
-        initializeHTTPRequest(HTTP_POST, "/api/v1/login", null,
+        initializeHTTPRequest(HTTP_POST, "/api/v1/login", "",
                 TelVerificationServiceTest.VALID_TEL_PARAMETER, HttpStatus.OK.value());
     }
 
     protected void anotherUserLoginBeforeFunctionalTest() throws IOException {
-        initializeHTTPRequest(HTTP_POST, "/api/v1/code", null,
+        initializeHTTPRequest(HTTP_POST, "/api/v1/code", "",
                 TelVerificationServiceTest.ANOTHER_VALID_TEL_PARAMETER, HttpStatus.OK.value());
-        initializeHTTPRequest(HTTP_POST, "/api/v1/login", null,
+        initializeHTTPRequest(HTTP_POST, "/api/v1/login", "",
                 TelVerificationServiceTest.ANOTHER_VALID_TEL_PARAMETER, HttpStatus.OK.value());
     }
 
 
     protected void logoutAfterFunctionalTest() throws IOException {
         initializeHTTPRequest(HTTP_GET, "/api/v1/logout",
-                null, null, HttpStatus.OK.value());
+                "", null, HttpStatus.OK.value());
     }
 
     protected String getUrl(String apiName) {
-        return "http://localhost:" + environment.getProperty("local.server.port") + apiName;
+        String url = "http://localhost:" + environment.getProperty("local.server.port");
+        return StringUtils.isEmpty(apiName) ? url : url + apiName;
     }
 
     protected String initializeHTTPRequest(String httpMethod, String urlInterface,
@@ -102,7 +104,8 @@ public class AbstractIntegrationTest {
                 httpRequest = httpDelete;
                 break;
         }
-
+        assert httpRequest != null;
+        httpRequest.setHeader("Expect", "100-continue");
         try (CloseableHttpResponse response = httpclient.execute(httpRequest)) {
             System.out.println(response.getStatusLine());
             Assertions.assertEquals(expectedHttpStatus, response.getStatusLine().getStatusCode());

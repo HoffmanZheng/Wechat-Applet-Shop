@@ -6,9 +6,11 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 
 @Component
+@WebFilter(filterName = "ShiroLoginFilter", urlPatterns = "/*")
 public class ShiroLoginFilter extends FormAuthenticationFilter {
 
     /**

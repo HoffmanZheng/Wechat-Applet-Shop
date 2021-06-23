@@ -2,19 +2,21 @@ package com.github.NervousOrange.wxshop.controller;
 
 import com.github.NervousOrange.wxshop.common.exception.DataNotFoundException;
 import com.github.NervousOrange.wxshop.common.exception.ShopNotAuthorizedException;
+import com.github.NervousOrange.wxshop.entity.PagedResponse;
 import com.github.NervousOrange.wxshop.entity.Response;
 import com.github.NervousOrange.wxshop.generated.Goods;
 import com.github.NervousOrange.wxshop.service.GoodsService;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
+@ResponseBody
 public class GoodsController {
 
     private GoodsService goodsService;
@@ -259,7 +261,7 @@ public class GoodsController {
      *     }
      */
     @GetMapping("/goods")
-    public PageInfo<Goods> getGoodsList(
+    public PagedResponse<List<Goods>> getGoodsList(
             @RequestParam("pageNum") Integer pageNum, @RequestParam("pageSize") Integer pageSize,
             @RequestParam(value = "shopId", required = false) Integer shopId) {
         return goodsService.getGoodsList(pageNum, pageSize, shopId);

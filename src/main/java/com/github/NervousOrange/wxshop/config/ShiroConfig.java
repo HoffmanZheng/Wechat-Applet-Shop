@@ -17,6 +17,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.Filter;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Configuration
@@ -34,17 +35,17 @@ public class ShiroConfig implements WebMvcConfigurer {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         shiroFilterFactoryBean.setSecurityManager(securityManager);
 
-        Map<String, Filter> filterMap = new HashMap<>();
+        Map<String, Filter> filterMap = shiroFilterFactoryBean.getFilters();
         filterMap.put("shiroLoginFilter", shiroLoginFilter);
         shiroFilterFactoryBean.setFilters(filterMap);
 
-        Map<String, String> pattern = new HashMap<>();
+        Map<String, String> pattern = new LinkedHashMap<>();
         // 登录和获取验证码的接口，可以匿名访问，不设置过滤器
         pattern.put("/api/v1/logout", "anon");
         pattern.put("/api/v1/login", "anon");
         pattern.put("/api/v1/code", "anon");
         pattern.put("/api/v1/status", "anon");
-        pattern.put("/**", "authc");
+        pattern.put("/api/v1/**", "authc");
         shiroFilterFactoryBean.setFilterChainDefinitionMap(pattern);
         return shiroFilterFactoryBean;
     }

@@ -3,9 +3,8 @@ package com.github.NervousOrange.wxshop.service;
 import com.github.NervousOrange.wxshop.common.exception.DataNotFoundException;
 import com.github.NervousOrange.wxshop.common.exception.ShopNotAuthorizedException;
 import com.github.NervousOrange.wxshop.config.UserContext;
+import com.github.NervousOrange.wxshop.entity.PagedResponse;
 import com.github.NervousOrange.wxshop.generated.*;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -97,13 +96,20 @@ public class GoodsService {
         return goodsList.get(0);
     }
 
-    public PageInfo<Goods> getGoodsList(Integer pageNum, Integer pageSize, Integer shopId) {
-        PageHelper.startPage(pageNum, pageSize);
+    public PagedResponse<List<Goods>> getGoodsList(Integer pageNum, Integer pageSize, Integer shopId) {
         GoodsExample example = new GoodsExample();
         if (shopId != null) {
-            example.createCriteria().andShopIdEqualTo(shopId).andStatusNotEqualTo(STATUS_DELETED);
+            example.createCriteria()
+                    .andShopIdEqualTo(shopId)
+                    .andStatusNotEqualTo(STATUS_DELETED);
         }
+        long goodsCount = goodsMapper.countByExample(example);
+        Integer totalPage = Math.toIntExact(goodsCount / pageSize);
+        Integer offset = (pageNum - 1) * pageSize;
+        Integer limit = pageSize;
+        example.setOffset(offset);
+        example.setLimit(limit);
         List<Goods> goodsList = goodsMapper.selectByExample(example);
-        return new PageInfo<>(goodsList);
+        return new PagedResponse<>(pageNum, pageSize, totalPage, goodsList);
     }
 }
