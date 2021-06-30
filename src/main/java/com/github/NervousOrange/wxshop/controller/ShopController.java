@@ -184,9 +184,11 @@ public class ShopController {
      */
     @PostMapping("/shop")
     public Response<Shop> createShop(@RequestBody Shop shop) {
+        User currentUser = UserContext.getCurrentUser();
         shop.setId(null);
         shop.setCreatedAt(new Date());
         shop.setUpdatedAt(new Date());
+        shop.setOwnerUserId(currentUser.getId());
         Shop result = shopService.createShop(shop);
         return Response.of(result, null);
     }

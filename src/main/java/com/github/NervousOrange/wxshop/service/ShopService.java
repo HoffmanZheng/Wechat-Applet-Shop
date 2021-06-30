@@ -26,8 +26,7 @@ public class ShopService {
 
     public Shop createShop(Shop shop) {
         shop.setStatus(STATUS_CREATED);
-        int id = shopMapper.insertSelective(shop);
-        shop.setId(id);
+        shopMapper.insertSelective(shop);
         return shop;
     }
 
@@ -55,7 +54,7 @@ public class ShopService {
         ShopExample example = new ShopExample();
         example.createCriteria().andOwnerUserIdEqualTo(userId).andStatusNotEqualTo(STATUS_DELETED);
         long shopCount = shopMapper.countByExample(example);
-        Integer totalPage = Math.toIntExact(shopCount / pageSize);
+        Integer totalPage = Math.toIntExact(shopCount / pageSize) + 1;
         Integer offset = (pageNum - 1) * pageSize;
         Integer limit = pageSize;
         example.setOffset(offset);

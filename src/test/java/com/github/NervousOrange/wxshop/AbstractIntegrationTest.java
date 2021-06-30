@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 import java.io.IOException;
 
 import static com.github.NervousOrange.wxshop.TestConstant.*;
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
 @ExtendWith(SpringExtension.class)  // Spring 为 JUnit 5 提供的插件，可以在测试中使用 Spring 相关的功能，依赖注入等
 @SpringBootTest(classes = WxshopApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -90,13 +91,15 @@ public class AbstractIntegrationTest {
             case HTTP_POST:
                 HttpPost httpPost = new HttpPost(getUrl(urlInterface) + requestParam);
                 httpPost.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-                httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(requestBody)));
+                StringEntity stringEntity = new StringEntity(objectMapper.writeValueAsString(requestBody), APPLICATION_JSON);
+                stringEntity.setChunked(true);
+                httpPost.setEntity(stringEntity);
                 httpRequest = httpPost;
                 break;
             case HTTP_PATCH:
                 HttpPatch httpPatch = new HttpPatch(getUrl(urlInterface) + requestParam);
                 httpPatch.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-                httpPatch.setEntity(new StringEntity(objectMapper.writeValueAsString(requestBody)));
+                httpPatch.setEntity(new StringEntity(objectMapper.writeValueAsString(requestBody), APPLICATION_JSON));
                 httpRequest = httpPatch;
                 break;
             case HTTP_DELETE:

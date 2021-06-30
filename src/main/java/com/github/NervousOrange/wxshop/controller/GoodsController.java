@@ -92,7 +92,7 @@ public class GoodsController {
     }
 
     /**
-     * @api {post} /goods/:id 删除商品
+     * @api {delete} /goods/:id 删除商品
      * @apiSampleRequest off
      * @apiName deleteGoods
      * @apiGroup 商品

@@ -35,8 +35,7 @@ public class GoodsService {
             throw new ShopNotAuthorizedException(SHOP_NOT_AUTHORIZED);
         } else {
             goods.setStatus(STATUS_CREATED);
-            int id = goodsMapper.insertSelective(goods);
-            goods.setId(id);
+            goodsMapper.insert(goods);  // 自增主键直接在实体中了
             return goods;
         }
     }
@@ -98,13 +97,15 @@ public class GoodsService {
 
     public PagedResponse<List<Goods>> getGoodsList(Integer pageNum, Integer pageSize, Integer shopId) {
         GoodsExample example = new GoodsExample();
+        GoodsExample.Criteria criteria = example.createCriteria();
         if (shopId != null) {
-            example.createCriteria()
-                    .andShopIdEqualTo(shopId)
+            criteria.andShopIdEqualTo(shopId)
                     .andStatusNotEqualTo(STATUS_DELETED);
+        } else {
+            criteria.andStatusNotEqualTo(STATUS_DELETED);
         }
         long goodsCount = goodsMapper.countByExample(example);
-        Integer totalPage = Math.toIntExact(goodsCount / pageSize);
+        Integer totalPage = Math.toIntExact(goodsCount / pageSize) + 1;
         Integer offset = (pageNum - 1) * pageSize;
         Integer limit = pageSize;
         example.setOffset(offset);

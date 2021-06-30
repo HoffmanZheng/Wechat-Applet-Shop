@@ -90,7 +90,7 @@ define({ "api": [
     "groupTitle": "商品"
   },
   {
-    "type": "post",
+    "type": "delete",
     "url": "/goods/:id",
     "title": "删除商品",
     "name": "deleteGoods",

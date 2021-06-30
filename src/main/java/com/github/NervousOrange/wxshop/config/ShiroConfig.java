@@ -16,7 +16,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.Filter;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -41,6 +40,7 @@ public class ShiroConfig implements WebMvcConfigurer {
 
         Map<String, String> pattern = new LinkedHashMap<>();
         // 登录和获取验证码的接口，可以匿名访问，不设置过滤器
+        // 这边需要使用 LinkedHashMap，才能在接口路径匹配时按顺序进行
         pattern.put("/api/v1/logout", "anon");
         pattern.put("/api/v1/login", "anon");
         pattern.put("/api/v1/code", "anon");
