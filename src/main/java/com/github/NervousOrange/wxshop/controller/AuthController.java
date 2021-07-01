@@ -1,7 +1,7 @@
 package com.github.NervousOrange.wxshop.controller;
 
 import com.github.NervousOrange.wxshop.config.UserContext;
-import com.github.NervousOrange.wxshop.entity.Response;
+import com.github.NervousOrange.wxshop.entity.LoginResponse;
 import com.github.NervousOrange.wxshop.generated.User;
 import com.github.NervousOrange.wxshop.service.AuthService;
 import com.github.NervousOrange.wxshop.service.TelVerificationService;
@@ -19,6 +19,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestController
 @RequestMapping("/api/v1")
+@ResponseBody
 public class AuthController {
     private final AuthService authService;
     private final TelVerificationService telVerificationService;
@@ -32,7 +33,8 @@ public class AuthController {
     }
 
     /**
-     * @api {post} /code 使用手机号，请求验证码
+     * @api {post} /code 请求验证码
+     * @apiSampleRequest off
      * @apiName code
      * @apiGroup 登录与鉴权
      *
@@ -40,7 +42,7 @@ public class AuthController {
      * @apiHeader {String} Content-Type application/json
      *
      * @apiParam {String} tel 手机号码
-     * @apiParamExample {json} Request-Example:
+     * @apiParamExample {json} Restatusquest-Example:
      *          {
      *              "tel": "13812345678"
      *          }
@@ -67,6 +69,7 @@ public class AuthController {
 
     /**
      * @api {post} /login 登录
+     * @apiSampleRequest off
      * @apiName login
      * @apiGroup 登录与鉴权
      *
@@ -110,6 +113,7 @@ public class AuthController {
 
     /**
      * @api {get} /status 获取登录状态
+     * @apiSampleRequest off
      * @apiName status
      * @apiGroup 登录与鉴权
      *
@@ -140,18 +144,19 @@ public class AuthController {
      *     }
      */
     @GetMapping("/status")
-    public Response status(HttpServletResponse response) {
+    public LoginResponse status(HttpServletResponse response) {
         User currentUser = UserContext.getCurrentUser();
         if (currentUser != null) {
-            return Response.loggedResponse(currentUser);
+            return LoginResponse.loggedResponse(currentUser);
         } else {
-            response.setStatus(UNAUTHORIZED.value());
-            return Response.notLoggedResponse(UNAUTHORIZED.getReasonPhrase());
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return LoginResponse.notLoggedResponse(UNAUTHORIZED.getReasonPhrase());
         }
     }
 
     /**
      * @api {get} /logout 登出
+     * @apiSampleRequest off
      * @apiName logout
      * @apiGroup 登录与鉴权
      *
@@ -170,14 +175,14 @@ public class AuthController {
      *     }
      */
     @GetMapping("/logout")
-    public Response logout(HttpServletResponse response) {
+    public LoginResponse logout(HttpServletResponse response) {
         String tel = (String) SecurityUtils.getSubject().getPrincipal();
         if (tel == null) {
             response.setStatus(UNAUTHORIZED.value());
-            return Response.notLoggedResponse(UNAUTHORIZED.getReasonPhrase());
+            return LoginResponse.notLoggedResponse(UNAUTHORIZED.getReasonPhrase());
         } else {
             SecurityUtils.getSubject().logout();
-            return Response.emptyResponse();
+            return LoginResponse.emptyResponse();
         }
     }
 

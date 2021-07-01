@@ -3,11 +3,16 @@
         PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
         "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
 
+<!-- mybatis-generator 配置文件 -->
 <generatorConfiguration>
 
     <context id="wxshop" targetRuntime="MyBatis3">
+        <!-- 让生成的 Mapper 上自带 @Mapper 注解 -->
+        <plugin type="org.mybatis.generator.plugins.MapperAnnotationPlugin"></plugin>
+        <!-- mybatis-generator 带上分页功能 -->
+        <plugin type="com.qiukeke.mybatis.plugins.MySQLLimitPlugin"></plugin>
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/wxshop"
+                        connectionURL="jdbc:mysql://localhost:3306/wxshop?characterEncoding=utf-8"
                         userId="root"
                         password="123456">
         </jdbcConnection>
@@ -33,9 +38,35 @@
             <property name="useActualColumnNames" value="false"/>
             <!-- 是否让数据库列名直接变成 Java 实体的属性, 否, snake case -> camel case -->
             <generatedKey column="id" sqlStatement="Mysql" identity="true" />
-            <columnOverride column="avatar_url" property="avatarUrl" />
+            <!-- useActualColumnNames=false 已经可以将数据库中的 snake_case 转换成 Java 中的 Camel_case 了，下同 -->
+            <!--<columnOverride column="avatar_url" property="avatarUrl" />
             <columnOverride column="created_at" property="createdAt" />
-            <columnOverride column="modified_at" property="modifiedAt" />
+            <columnOverride column="modified_at" property="modifiedAt" />-->
+        </table>
+
+        <table schema="wxshop" tableName="tb_goods" domainObjectName="Goods" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+        </table>
+
+        <table schema="wxshop" tableName="tb_order" domainObjectName="Order" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+        </table>
+
+        <table schema="wxshop" tableName="tb_order_goods" domainObjectName="OrderGoods" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+        </table>
+
+        <table schema="wxshop" tableName="tb_shop" domainObjectName="Shop" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
+        </table>
+
+        <table schema="wxshop" tableName="tb_shopping_cart" domainObjectName="ShoppingCart" >
+            <property name="useActualColumnNames" value="false"/>
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
         </table>
 
     </context>
