@@ -11,6 +11,8 @@ import org.apache.http.util.EntityUtils;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,6 +40,7 @@ public class AbstractIntegrationTest {
     protected static final BasicCookieStore cookieStore = new BasicCookieStore();
     protected static final CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
     protected static String COOKIE;
+    private static final Logger logger = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
     @Value("${spring.datasource.url}")
     private String testUrl;
@@ -49,7 +52,7 @@ public class AbstractIntegrationTest {
     private String testPassword;
 
     protected void initDataBase() {
-        System.out.println("------------init Database------------");
+        logger.info("------------init Database------------");
         Flyway flyway = Flyway.configure().dataSource(testUrl, testUserName, testPassword).load();
         flyway.clean();
         flyway.migrate();
@@ -110,10 +113,10 @@ public class AbstractIntegrationTest {
         assert httpRequest != null;
         httpRequest.setHeader("Expect", "100-continue");
         try (CloseableHttpResponse response = httpclient.execute(httpRequest)) {
-            System.out.println(response.getStatusLine());
+            logger.info(String.valueOf(response.getStatusLine()));
             Assertions.assertEquals(expectedHttpStatus, response.getStatusLine().getStatusCode());
             String responseString = EntityUtils.toString(response.getEntity());
-            System.out.println(responseString);
+            logger.info(responseString);
             return responseString;
         }
 

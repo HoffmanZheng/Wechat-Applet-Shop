@@ -8,6 +8,8 @@ import com.github.NervousOrange.wxshop.entity.Response;
 import com.github.NervousOrange.wxshop.generated.Shop;
 import com.github.NervousOrange.wxshop.generated.User;
 import com.github.NervousOrange.wxshop.service.ShopService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,12 @@ import java.util.List;
 public class ShopController {
 
     private ShopService shopService;
+
+    private static final Logger logger = LoggerFactory.getLogger(ShopController.class);
+
+    public static void main(String[] args) {
+        logger.info("while log?????");
+    }
 
     @Autowired
     public ShopController(ShopService shopService) {
