@@ -1,7 +1,6 @@
 package com.github.NervousOrange.wxshop.service;
 
-import com.github.NervousOrange.wxshop.common.exception.DataNotFoundException;
-import com.github.NervousOrange.wxshop.common.exception.ShopNotAuthorizedException;
+import com.github.NervousOrange.wxshop.common.exception.HttpException;
 import com.github.NervousOrange.wxshop.config.UserContext;
 import com.github.NervousOrange.wxshop.entity.PagedResponse;
 import com.github.NervousOrange.wxshop.generated.*;
@@ -29,10 +28,10 @@ public class GoodsService {
         // 对 shopId 做校验，请求者需要是店铺的所有者
         Shop shop = shopMapper.selectByPrimaryKey(goods.getShopId());
         if (shop == null) {
-            throw new DataNotFoundException(String.format("店铺不存在: shopId = [%s]", goods.getShopId()));
+            throw HttpException.notFound(String.format("店铺不存在: shopId = [%s]", goods.getShopId()));
         }
         if (!shop.getOwnerUserId().equals(UserContext.getCurrentUser().getId())) {
-            throw new ShopNotAuthorizedException(SHOP_NOT_AUTHORIZED);
+            throw HttpException.forbidden(SHOP_NOT_AUTHORIZED);
         } else {
             goods.setStatus(STATUS_CREATED);
             goodsMapper.insert(goods);  // 自增主键直接在实体中了
@@ -45,13 +44,13 @@ public class GoodsService {
         example.createCriteria().andIdEqualTo(goodsId).andStatusNotEqualTo(STATUS_DELETED);
         List<Goods> goodsList = goodsMapper.selectByExample(example);
         if (goodsList == null || goodsList.isEmpty()) {
-            throw new DataNotFoundException(GOODS_NOT_FOUND);
+            throw HttpException.notFound(GOODS_NOT_FOUND);
         }
         // 对 shopId 做校验，请求者需要是店铺的所有者
         Goods goodsById = goodsList.get(0);
         Shop shop = shopMapper.selectByPrimaryKey(goodsById.getShopId());
         if (!shop.getOwnerUserId().equals(UserContext.getCurrentUser().getId())) {
-            throw new ShopNotAuthorizedException(SHOP_NOT_AUTHORIZED);
+            throw HttpException.forbidden(SHOP_NOT_AUTHORIZED);
         } else {
             goodsById.setStatus(STATUS_DELETED);
             goodsById.setUpdatedAt(new Date());
@@ -65,13 +64,13 @@ public class GoodsService {
         example.createCriteria().andIdEqualTo(goodsId).andStatusNotEqualTo(STATUS_DELETED);
         List<Goods> goodsList = goodsMapper.selectByExample(example);
         if (goodsList == null || goodsList.isEmpty()) {
-            throw new DataNotFoundException(GOODS_NOT_FOUND);
+            throw HttpException.notFound(GOODS_NOT_FOUND);
         }
         // 对 shopId 做校验，请求者需要是店铺的所有者
         Goods goodsById = goodsList.get(0);
         Shop shop = shopMapper.selectByPrimaryKey(goodsById.getShopId());
         if (!shop.getOwnerUserId().equals(UserContext.getCurrentUser().getId())) {
-            throw new ShopNotAuthorizedException(SHOP_NOT_AUTHORIZED);
+            throw HttpException.forbidden(SHOP_NOT_AUTHORIZED);
         } else {
             goodsById.setName(goods.getName());
             goodsById.setDetails(goods.getDetails());
@@ -90,7 +89,7 @@ public class GoodsService {
         example.createCriteria().andIdEqualTo(goodsId).andStatusNotEqualTo(STATUS_DELETED);
         List<Goods> goodsList = goodsMapper.selectByExample(example);
         if (goodsList == null || goodsList.isEmpty()) {
-            throw new DataNotFoundException(GOODS_NOT_FOUND);
+            throw HttpException.notFound(GOODS_NOT_FOUND);
         }
         return goodsList.get(0);
     }
