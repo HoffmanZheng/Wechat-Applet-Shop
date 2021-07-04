@@ -2,6 +2,7 @@ package com.github.NervousOrange.wxshop.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.NervousOrange.wxshop.common.exception.HttpException;
 import com.github.NervousOrange.wxshop.controller.ShoppingCartController;
 import com.github.NervousOrange.wxshop.dao.ShoppingCartQuery;
 import com.github.NervousOrange.wxshop.entity.PagedResponse;
@@ -20,8 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.github.NervousOrange.wxshop.common.constant.StringConstants.STATUS_CREATED;
-import static com.github.NervousOrange.wxshop.common.constant.StringConstants.STATUS_DELETED;
+import static com.github.NervousOrange.wxshop.common.constant.StringConstants.*;
 
 @Service
 public class ShoppingCartService {
@@ -93,7 +93,13 @@ public class ShoppingCartService {
         for (ShoppingCartController.AddToShoppingCartItem item : requestItemList) {
             goodsIdList.add(item.getId());
         }
+        if(goodsIdList.isEmpty()) {
+            throw HttpException.badRequest(String.format(EMPTY_PARAM, "goodsId"));
+        }
         List<Goods> goodsList = shoppingCartQuery.getShopIdByGoodsIdList(goodsIdList);
+        if (goodsList == null || goodsList.isEmpty()) {
+            throw HttpException.notFound(GOODS_NOT_FOUND);
+        }
         Integer shopId = goodsList.get(0).getShopId();
         for (Goods goods : goodsList) {
             if (!goods.getShopId().equals(shopId)) {
@@ -110,7 +116,7 @@ public class ShoppingCartService {
             shoppingCart.setShopId(shopId);
             shoppingCartList.add(shoppingCart);
         }
-        shoppingCartQuery.insertShoppingCartList(shoppingCartList);
+        shoppingCartQuery.addOrUpdateShoppingCartList(shoppingCartList);
         List<ShoppingCartData> shoppingCartDataList = shoppingCartQuery.getShoppingCartDataByUserIdAndShopId(userId, shopId);
         ShoppingCartData shoppingCartData = mergeShoppingCartDataList(shoppingCartDataList);
         return Response.of(shoppingCartData, null);

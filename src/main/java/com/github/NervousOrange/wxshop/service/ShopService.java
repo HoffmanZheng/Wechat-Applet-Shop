@@ -1,5 +1,6 @@
 package com.github.NervousOrange.wxshop.service;
 
+import com.github.NervousOrange.wxshop.common.exception.HttpException;
 import com.github.NervousOrange.wxshop.entity.PagedResponse;
 import com.github.NervousOrange.wxshop.generated.Shop;
 import com.github.NervousOrange.wxshop.generated.ShopExample;
@@ -11,8 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 
-import static com.github.NervousOrange.wxshop.common.constant.StringConstants.STATUS_CREATED;
-import static com.github.NervousOrange.wxshop.common.constant.StringConstants.STATUS_DELETED;
+import static com.github.NervousOrange.wxshop.common.constant.StringConstants.*;
 
 @Service
 public class ShopService {
@@ -30,14 +30,27 @@ public class ShopService {
         return shop;
     }
 
-    public Shop updateShopById(Integer shopId, Shop shop) {
-        shop.setId(shopId);
+    public Shop updateShopById(Integer userId, Shop shop) {
+        Shop shopInDatabase = shopMapper.selectByPrimaryKey(shop.getId());
+        if (shopInDatabase == null) {
+            throw HttpException.notFound(SHOP_NOT_FOUND);
+        }
+        if (!shopInDatabase.getOwnerUserId().equals(userId)) {
+            throw HttpException.forbidden(SHOP_NOT_AUTHORIZED);
+        }
         shop.setUpdatedAt(new Date());
         shopMapper.updateByPrimaryKeySelective(shop);
-        return shopMapper.selectByPrimaryKey(shopId);
+        return shopMapper.selectByPrimaryKey(shop.getId());
     }
 
-    public Shop deleteShopById(Integer shopId) {
+    public Shop deleteShopById(Integer shopId, Integer userId) {
+        Shop shopInDatabase = shopMapper.selectByPrimaryKey(shopId);
+        if (shopInDatabase == null) {
+            throw HttpException.notFound(SHOP_NOT_FOUND);
+        }
+        if (!shopInDatabase.getOwnerUserId().equals(userId)) {
+            throw HttpException.forbidden(SHOP_NOT_AUTHORIZED);
+        }
         Shop shop = new Shop();
         shop.setId(shopId);
         shop.setStatus(STATUS_DELETED);
@@ -46,7 +59,14 @@ public class ShopService {
     }
 
     public Shop getShopById(Integer shopId) {
-        return shopMapper.selectByPrimaryKey(shopId);
+        ShopExample example = new ShopExample();
+        example.createCriteria().andIdEqualTo(shopId).andStatusEqualTo(STATUS_CREATED);
+        List<Shop> shops = shopMapper.selectByExample(example);
+        if (shops == null || shops.size() == 0) {
+            throw HttpException.notFound(SHOP_NOT_FOUND);
+        } else {
+            return shops.get(0);
+        }
     }
 
     public PagedResponse<List<Shop>> getShopList(Integer pageNum, Integer pageSize, User currentUser) {

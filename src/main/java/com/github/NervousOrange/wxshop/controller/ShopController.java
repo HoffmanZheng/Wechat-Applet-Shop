@@ -1,7 +1,7 @@
 package com.github.NervousOrange.wxshop.controller;
 
 import com.github.NervousOrange.wxshop.common.exception.DataNotFoundException;
-import com.github.NervousOrange.wxshop.common.exception.ShopNotAuthorizedException;
+import com.github.NervousOrange.wxshop.common.exception.HttpException;
 import com.github.NervousOrange.wxshop.config.UserContext;
 import com.github.NervousOrange.wxshop.entity.PagedResponse;
 import com.github.NervousOrange.wxshop.entity.Response;
@@ -85,13 +85,12 @@ public class ShopController {
     @PatchMapping("/shop/{id}")
     public Response<Shop> updateShop(@PathVariable("id") Integer shopId, @RequestBody Shop shop, HttpServletResponse response) {
         try {
-            Shop result = shopService.updateShopById(shopId, shop);
+            shop.setId(shopId);
+            User currentUser = UserContext.getCurrentUser();
+            Shop result = shopService.updateShopById(currentUser.getId(), shop);
             return Response.of(result, null);
-        } catch (ShopNotAuthorizedException e) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return Response.of(null, e.getMessage());
-        } catch (DataNotFoundException e) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
             return Response.of(null, e.getMessage());
         }
     }
@@ -137,13 +136,11 @@ public class ShopController {
     @DeleteMapping("/shop/{id}")
     public Response<Shop> deleteShop(@PathVariable("id") Integer shopId, HttpServletResponse response) {
         try {
-            Shop result = shopService.deleteShopById(shopId);
+            User currentUser = UserContext.getCurrentUser();
+            Shop result = shopService.deleteShopById(shopId, currentUser.getId());
             return Response.of(result, null);
-        } catch (ShopNotAuthorizedException e) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return Response.of(null, e.getMessage());
-        } catch (DataNotFoundException e) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
             return Response.of(null, e.getMessage());
         }
     }

@@ -44,11 +44,15 @@
         </foreach>
     </select>
 
-    <insert id="insertShoppingCartList" >
+    <insert id="addOrUpdateShoppingCartList" >
         insert into tb_shopping_cart (user_id, goods_id, `number`, status, shop_id) values
         <foreach collection="shoppingCartList" item="shoppingCart" separator="," >
             (#{shoppingCart.userId}, #{shoppingCart.goodsId}, #{shoppingCart.number}, #{shoppingCart.status}, #{shoppingCart.shopId})
         </foreach>
+        on duplicate key update
+        number = values(number),
+        updated_at = now(),
+        status = '已创建'
     </insert>
 
     <select id="getShoppingCartDataByUserIdAndShopId" resultMap="ShoppingCartData" >

@@ -1,7 +1,6 @@
 package com.github.NervousOrange.wxshop.controller;
 
-import com.github.NervousOrange.wxshop.common.exception.DataNotFoundException;
-import com.github.NervousOrange.wxshop.common.exception.ShopNotAuthorizedException;
+import com.github.NervousOrange.wxshop.common.exception.HttpException;
 import com.github.NervousOrange.wxshop.entity.PagedResponse;
 import com.github.NervousOrange.wxshop.entity.Response;
 import com.github.NervousOrange.wxshop.generated.Goods;
@@ -85,8 +84,8 @@ public class GoodsController {
             Goods result = goodsService.createGoods(goods);
             response.setStatus(HttpStatus.CREATED.value());
             return Response.of(result, null);
-        } catch (ShopNotAuthorizedException e) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
             return Response.of(null, e.getMessage());
         }
     }
@@ -136,11 +135,8 @@ public class GoodsController {
             Goods goods = goodsService.deleteGoodsById(goodsId);
             response.setStatus(HttpStatus.NO_CONTENT.value());
             return Response.of(goods, null);
-        } catch (ShopNotAuthorizedException e) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return Response.of(null, e.getMessage());
-        } catch (DataNotFoundException e) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
             return Response.of(null, e.getMessage());
         }
     }
@@ -200,11 +196,8 @@ public class GoodsController {
         try {
             Goods result = goodsService.updateGoodsById(goodsId, goods);
             return Response.of(result, null);
-        } catch (ShopNotAuthorizedException e) {
-            response.setStatus(HttpStatus.FORBIDDEN.value());
-            return Response.of(null, e.getMessage());
-        } catch (DataNotFoundException e) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
             return Response.of(null, e.getMessage());
         }
     }
@@ -307,8 +300,8 @@ public class GoodsController {
         try {
             Goods goods = goodsService.getGoodsById(goodsId);
             return Response.of(goods, null);
-        } catch (DataNotFoundException e) {
-            response.setStatus(HttpStatus.NOT_FOUND.value());
+        } catch (HttpException e) {
+            response.setStatus(e.getStatusCode());
             return Response.of(null, e.getMessage());
         }
     }
