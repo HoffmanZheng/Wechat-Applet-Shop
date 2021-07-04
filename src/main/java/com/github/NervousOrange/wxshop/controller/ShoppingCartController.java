@@ -1,11 +1,12 @@
 package com.github.NervousOrange.wxshop.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.NervousOrange.wxshop.common.exception.DataNotFoundException;
 import com.github.NervousOrange.wxshop.common.exception.ShopNotAuthorizedException;
 import com.github.NervousOrange.wxshop.config.UserContext;
+import com.github.NervousOrange.wxshop.entity.PagedResponse;
 import com.github.NervousOrange.wxshop.entity.Response;
-import com.github.NervousOrange.wxshop.entity.SingleShoppingCart;
-import com.github.NervousOrange.wxshop.generated.Shop;
+import com.github.NervousOrange.wxshop.entity.ShoppingCartData;
 import com.github.NervousOrange.wxshop.generated.User;
 import com.github.NervousOrange.wxshop.service.ShoppingCartService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -27,7 +29,7 @@ public class ShoppingCartController {
     }
 
     /**
-     * @api {delete} /shoppingCart/:goodsId 删除当前购物车某个商品
+     * @api {delete} /shoppingCart/:goodsId 删除购物车某个商品
      * @apiSampleRequest off
      * @apiName deleteGoodsInShoppingCart
      * @apiGroup 购物车
@@ -80,11 +82,11 @@ public class ShoppingCartController {
      *
      */
     @DeleteMapping("/shoppingCart/{goodsId}")
-    public Response<SingleShoppingCart> deleteGoodsInShoppingCart(@PathVariable("goodsId") Integer goodsId, HttpServletResponse response) {
+    public Response<ShoppingCartData> deleteGoodsInShoppingCart(@PathVariable("goodsId") Integer goodsId, HttpServletResponse response) {
         try {
             User currentUser = UserContext.getCurrentUser();
-            SingleShoppingCart singleShoppingCart = shoppingCartService.deleteGoodsInShoppingCart(currentUser, goodsId);
-            return Response.of(singleShoppingCart, null);
+            ShoppingCartData shoppingCartData = shoppingCartService.deleteGoodsInShoppingCart(currentUser, goodsId);
+            return Response.of(shoppingCartData, null);
         } catch (ShopNotAuthorizedException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return Response.of(null, e.getMessage());
@@ -94,8 +96,41 @@ public class ShoppingCartController {
         }
     }
 
+    public static class AddToShoppingCartRequest {
+        List<AddToShoppingCartItem> goods;
+
+        public List<AddToShoppingCartItem> getGoods() {
+            return goods;
+        }
+
+        public void setGoods(List<AddToShoppingCartItem> goods) {
+            this.goods = goods;
+        }
+    }
+
+    public static class AddToShoppingCartItem {
+        int id;        // 必传参数可以使用非包装类型，没传的话会反序列化失败，直接报错
+        int number;
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public int getNumber() {
+            return number;
+        }
+
+        public void setNumber(int number) {
+            this.number = number;
+        }
+    }
+
     /**
-     * @api {post} /shoppingCart 商品加购物车
+     * @api {post} /shoppingCart 添加商品至购物车
      * @apiSampleRequest off
      * @apiName addGoodsInShoppingCart
      * @apiGroup 购物车
@@ -159,9 +194,11 @@ public class ShoppingCartController {
      *
      */
     @PostMapping("/shoppingCart")
-    public Response<Shop> addGoodsInShoppingCart(@PathVariable("id") Integer shopId, @RequestBody Shop shop, HttpServletResponse response) {
+    public Response<ShoppingCartData> addGoodsInShoppingCart(
+            @RequestBody AddToShoppingCartRequest addToShoppingCartRequest, HttpServletResponse response) {
         try {
-            return null;
+            User currentUser = UserContext.getCurrentUser();
+            return shoppingCartService.addGoodsInShoppingCart(addToShoppingCartRequest, currentUser.getId());
         } catch (ShopNotAuthorizedException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return Response.of(null, e.getMessage());
@@ -231,16 +268,21 @@ public class ShoppingCartController {
      *     }
      *
      */
-    @PatchMapping("/shoppingCart")
-    public Response<Shop> getGoodsListInShoppingCart(@PathVariable("id") Integer shopId, @RequestBody Shop shop, HttpServletResponse response) {
+    @GetMapping("/shoppingCart")
+    public PagedResponse<List<ShoppingCartData>> getGoodsListInShoppingCart(
+            @RequestParam("pageNum") int pageNum,
+            @RequestParam("pageSize") int pageSize,
+            HttpServletResponse response) throws JsonProcessingException {
         try {
-            return null;
+            User currentUser = UserContext.getCurrentUser();
+            return shoppingCartService.getGoodsListInShoppingCartOfUser(currentUser.getId(), pageNum, pageSize);
         } catch (ShopNotAuthorizedException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
-            return Response.of(null, e.getMessage());
+            // return Response.of(null, e.getMessage());
         } catch (DataNotFoundException e) {
             response.setStatus(HttpStatus.NOT_FOUND.value());
-            return Response.of(null, e.getMessage());
+            // return Response.of(null, e.getMessage());
         }
+        return null;
     }
 }

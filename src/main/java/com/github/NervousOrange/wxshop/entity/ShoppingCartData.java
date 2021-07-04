@@ -4,11 +4,11 @@ import com.github.NervousOrange.wxshop.generated.Shop;
 
 import java.util.List;
 
-public class SingleShoppingCart {
+public class ShoppingCartData {
 
     private Shop shop;
 
-    private List<ShoppingCartGoods> goodsList;
+    private List<ShoppingCartGoods> goods;
 
     public Shop getShop() {
         return shop;
@@ -18,11 +18,11 @@ public class SingleShoppingCart {
         this.shop = shop;
     }
 
-    public List<ShoppingCartGoods> getGoodsList() {
-        return goodsList;
+    public List<ShoppingCartGoods> getGoods() {
+        return goods;
     }
 
-    public void setGoodsList(List<ShoppingCartGoods> goodsList) {
-        this.goodsList = goodsList;
+    public void setGoods(List<ShoppingCartGoods> goods) {
+        this.goods = goods;
     }
 }

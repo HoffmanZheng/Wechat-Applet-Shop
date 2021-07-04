@@ -1261,7 +1261,7 @@ define({ "api": [
   {
     "type": "post",
     "url": "/shoppingCart",
-    "title": "商品加购物车",
+    "title": "添加商品至购物车",
     "name": "addGoodsInShoppingCart",
     "group": "购物车",
     "header": {
@@ -1351,7 +1351,7 @@ define({ "api": [
   {
     "type": "delete",
     "url": "/shoppingCart/:goodsId",
-    "title": "删除当前购物车某个商品",
+    "title": "删除购物车某个商品",
     "name": "deleteGoodsInShoppingCart",
     "group": "购物车",
     "header": {

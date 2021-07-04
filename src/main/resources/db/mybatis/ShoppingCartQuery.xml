@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.NervousOrange.wxshop.dao.ShoppingCartQuery">
+
+    <select id="countShopInShoppingCart" resultType="int" >
+        select count(DISTINCT shop_id) from tb_shopping_cart where user_id = #{userId}
+        and status = '已创建'
+    </select>
+
+    <select id="getPagedShoppingCartShop" resultType="Shop" >
+        SELECT t1.id, t1.name, t1.description, t1.img_url, t1.owner_user_id,
+        t1.status, t1.created_at, t1.updated_at
+        FROM wxshop.tb_shop t1 inner join
+        (select DISTINCT shop_id from tb_shopping_cart where user_id = 1
+        and status = '已创建' limit #{offset}, #{pageSize}) t2 on t1.id = t2.shop_id
+    </select>
+
+    <select id="getPagedShoppingCartGoodsList" resultMap="ShoppingCartGoodsList" >
+        SELECT t1.goods_id, t1.`number`, t1.status, t1.shop_id, t1.created_at, t1.updated_at,
+        t3.name, t3.description, t3.details, t3.img_url, t3.price
+        FROM wxshop.tb_shopping_cart t1 inner join
+        (select DISTINCT shop_id from tb_shopping_cart where user_id = 1
+        and status = '已创建' limit #{offset}, #{pageSize}) t2 on t1.shop_id = t2.shop_id
+        inner join tb_goods t3 on t1.goods_id = t3.id
+        where t1.status = '已创建'
+    </select>
+
+    <resultMap id="ShoppingCartGoodsList" type="ShoppingCartGoods" >
+        <id property="id" column="goods_id"/>
+        <result property="number" column="number"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="details" column="details"/>
+        <result property="imgUrl" column="img_url"/>
+        <result property="price" column="price"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="getShopIdByGoodsIdList" resultType="Goods" >
+        select id, shop_id from tb_goods where id in
+        <foreach collection="goodsIdList" item="goodsId" separator="," open="(" close=")" >
+            #{goodsId}
+        </foreach>
+    </select>
+
+    <insert id="insertShoppingCartList" >
+        insert into tb_shopping_cart (user_id, goods_id, `number`, status, shop_id) values
+        <foreach collection="shoppingCartList" item="shoppingCart" separator="," >
+            (#{shoppingCart.userId}, #{shoppingCart.goodsId}, #{shoppingCart.number}, #{shoppingCart.status}, #{shoppingCart.shopId})
+        </foreach>
+    </insert>
+
+    <select id="getShoppingCartDataByUserIdAndShopId" resultMap="ShoppingCartData" >
+        select t1.id as shop_id, t1.name as shop_name, t1.description as shop_description, t1.img_url as shop_img_url,
+        t1.owner_user_id as owner_user_id, t1.created_at as shop_created_at, t1.updated_at as shop_updated_at,
+        t2.id as goods_id, t2.name as goods_name, t2.description as goods_description, t2.details as goods_details,
+        t2.img_url as goods_img_url, t2.price as goods_price, t2.created_at as goods_created_at, t2.updated_at as goods_updated_at,
+        t3.number as goods_number
+        from tb_shopping_cart t3 join tb_shop t1 on t1.id = t3.shop_id
+        join tb_goods t2 on t2.id = t3.goods_id
+        where t3.user_id = #{userId} and t3.shop_id = #{shopId} and t3.status = '已创建'
+    </select>
+
+    <resultMap id="ShoppingCartData" type="ShoppingCartData" >
+        <association property="shop" javaType="Shop" >
+            <id property="id" column="shop_id"/>
+            <result property="name" column="shop_name"/>
+            <result property="description" column="shop_description"/>
+            <result property="imgUrl" column="shop_img_url"/>
+            <result property="ownerUserId" column="owner_user_id"/>
+            <result property="createdAt" column="shop_created_at"/>
+            <result property="updatedAt" column="shop_updated_at"/>
+        </association>
+        <collection property="goods" ofType="ShoppingCartGoods" >
+            <id property="id" column="goods_id"/>
+            <result property="name" column="goods_name"/>
+            <result property="description" column="goods_description"/>
+            <result property="details" column="goods_details"/>
+            <result property="imgUrl" column="goods_img_url"/>
+            <result property="price" column="goods_price"/>
+            <result property="number" column="goods_number"/>
+            <result property="createdAt" column="goods_created_at"/>
+            <result property="updatedAt" column="goods_updated_at"/>
+        </collection>
+    </resultMap>
+</mapper>
