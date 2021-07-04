@@ -37,7 +37,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Order(1)
     public void getStatusWhenUserIsNotLogged() throws IOException {
-        logger.info("测试 —— 获取登录状态：未登录返回 401 Unauthorized");
+        logger.info("---登录与鉴权：获取登录状态 未登录返回 401 Unauthorized---");
         String responseString = initializeHTTPRequest(
                 HTTP_GET, "/api/v1/status",
                 "", null, HttpStatus.UNAUTHORIZED.value());
@@ -49,7 +49,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Order(2)
     public void getCodeWithIncorrectParameter() throws IOException {
-        logger.info("测试 —— 请求手机验证码：输入无效手机号时返回 400 Bad Request");
+        logger.info("---登录与鉴权：请求手机验证码 输入无效手机号时返回 400 Bad Request---");
         String responseString = initializeHTTPRequest(
                 HTTP_POST, "/api/v1/code",
                 "", TelVerificationServiceTest.INVALID_TEL_PARAMETER,
@@ -59,7 +59,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Order(3)
     public void getCodeWithCorrectParameter() throws IOException {
-        logger.info("测试 —— 请求手机验证码：输入参数正确时返回 200 OK");
+        logger.info("---登录与鉴权：请求手机验证码 输入参数正确时返回 200 OK---");
         String responseString = initializeHTTPRequest(
                 HTTP_POST, "/api/v1/code",
                 "", TelVerificationServiceTest.VALID_TEL_PARAMETER,
@@ -69,7 +69,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Order(4)
     public void failedLogout() throws IOException {
-        logger.info("测试 —— 登出：失败返回 401 Unauthorized");
+        logger.info("---登录与鉴权：登出 失败返回 401 Unauthorized---");
         String responseString = initializeHTTPRequest(
                 HTTP_GET, "/api/v1/logout",
                 "", null, HttpStatus.UNAUTHORIZED.value());
@@ -81,7 +81,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Order(5)
     public void loginWithIncorrectParameter() throws IOException {
-        logger.info("测试 —— 登录：输入无效手机号时返回 400 Bad Request");
+        logger.info("---登录与鉴权：登录 输入无效手机号时返回 400 Bad Request---");
         String responseString = initializeHTTPRequest(
                 HTTP_POST, "/api/v1/login",
                 "", TelVerificationServiceTest.INVALID_TEL_PARAMETER,
@@ -91,7 +91,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Order(6)
     public void loginWithWrongPassword() throws IOException {
-        logger.info("测试 —— 登录：错误的密码 返回 403 Forbidden");
+        logger.info("---登录与鉴权：登录 错误的密码 返回 403 Forbidden---");
         String responseString = initializeHTTPRequest(
                 HTTP_POST, "/api/v1/login",
                 "", TelVerificationServiceTest.WRONG_LOGIN_PARAMETER, HttpStatus.FORBIDDEN.value());
@@ -100,7 +100,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Order(7)
     public void successfulLogin() throws IOException {
-        logger.info("测试 —— 登录：成功返回 200 OK");
+        logger.info("---登录与鉴权：登录 成功返回 200 OK---");
         String responseString = initializeHTTPRequest(
                 HTTP_POST, "/api/v1/login",
                 "", TelVerificationServiceTest.VALID_TEL_PARAMETER, HttpStatus.OK.value());
@@ -109,7 +109,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Order(8)
     public void getStatusWhenUserIsLogged() throws IOException {
-        logger.info("测试 —— 获取登录状态：已登录返回 200 OK");
+        logger.info("---登录与鉴权：获取登录状态 已登录返回 200 OK---");
         String responseString = initializeHTTPRequest(
                 HTTP_GET, "/api/v1/status",
                 "", null, HttpStatus.OK.value());
@@ -122,7 +122,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test
     @Order(9)
     public void successfulLogout() throws IOException {
-        logger.info("测试 —— 登出：成功返回 200 OK");
+        logger.info("---登录与鉴权：登出 成功返回 200 OK---");
         String responseString = initializeHTTPRequest(
                 HTTP_GET, "/api/v1/logout",
                 "", null, HttpStatus.OK.value());
@@ -143,12 +143,12 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     @Test  // 测试过滤器前需要退出登录
     @Order(11)
     public void testLoginFilter() throws IOException {
-        logger.info("测试 —— 匿名拦截器：未登录返回 401 Unauthorized");
+        logger.info("---登录与鉴权：匿名拦截器 未登录返回 401 Unauthorized---");
         initializeHTTPRequest(HTTP_GET, "/api/v1/any", "", null, HttpStatus.UNAUTHORIZED.value());
     }
 
     public void successfulLoginReturnSetCookie() throws IOException {
-        logger.info("登录 —— 获取 cookie");
+        logger.info("---登录与鉴权：获取 cookie---");
         HttpPost httpPost = new HttpPost(getUrl("/api/v1/login"));
         httpPost.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.setEntity(new StringEntity(objectMapper.writeValueAsString(TelVerificationServiceTest.VALID_TEL_PARAMETER)));
@@ -165,7 +165,7 @@ public class AuthIntegrationTest extends AbstractIntegrationTest {
     }
 
     private void successfulLoginWithCookie() throws IOException {
-        logger.info("用 Cookie 登录：成功返回 200 OK");
+        logger.info("---登录与鉴权：用 Cookie 登录 成功返回 200 OK---");
         HttpPost httpPost = new HttpPost(getUrl("/api/v1/login"));
         httpPost.setHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.setHeader("Cookie", COOKIE);

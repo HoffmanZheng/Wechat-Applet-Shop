@@ -7,6 +7,12 @@
         <setting name="mapUnderscoreToCamelCase" value="true"/>
         <setting name="logImpl" value="STDOUT_LOGGING" />
     </settings>
+    <typeAliases>
+        <typeAlias alias="ShoppingCartGoods" type="com.github.NervousOrange.wxshop.entity.ShoppingCartGoods"/>
+        <typeAlias alias="ShoppingCartData" type="com.github.NervousOrange.wxshop.entity.ShoppingCartData"/>
+        <typeAlias alias="Shop" type="com.github.NervousOrange.wxshop.generated.Shop"/>
+        <typeAlias alias="Goods" type="com.github.NervousOrange.wxshop.generated.Goods"/>
+    </typeAliases>
   <!--  <typeHandlers>
         <typeHandler handler="org.apache.ibatis.type.EnumOrdinalTypeHandler" javaType="java.math.RoundingMode"/>
     </typeHandlers>-->
@@ -28,5 +34,6 @@
         <mapper resource="db/mybatis/OrderMapper.xml" />
         <mapper resource="db/mybatis/ShopMapper.xml" />
         <mapper resource="db/mybatis/ShoppingCartMapper.xml" />
+        <mapper resource="db/mybatis/ShoppingCartQuery.xml" />
     </mappers>
 </configuration>
