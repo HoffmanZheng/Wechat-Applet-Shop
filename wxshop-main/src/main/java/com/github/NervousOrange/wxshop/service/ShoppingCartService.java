@@ -93,7 +93,7 @@ public class ShoppingCartService {
         for (ShoppingCartController.AddToShoppingCartItem item : requestItemList) {
             goodsIdList.add(item.getId());
         }
-        if(goodsIdList.isEmpty()) {
+        if (goodsIdList.isEmpty()) {
             throw HttpException.badRequest(String.format(EMPTY_PARAM, "goodsId"));
         }
         List<Goods> goodsList = shoppingCartQuery.getShopIdByGoodsIdList(goodsIdList);

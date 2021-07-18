@@ -8,3 +8,18 @@ spring:
 mybatis:
   config-location: classpath:db/mybatis/config.xml
 
+server:
+  port: 8080
+
+
+dubbo:
+  application:
+    name: wxshop-main
+  registry:
+    address: zookeeper://localhost:2181
+  consumer:
+    timeout: 3000
+
+order:
+  service:
+    version: 1.0.0
